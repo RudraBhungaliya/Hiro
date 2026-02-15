@@ -9,6 +9,7 @@ function DiagramGenerator() {
   const [error, setError] = useState(null);
   const [diagramCode, setDiagramCode] = useState('');
 
+
   const handleAnalyze = async () => {
     if (!path.trim()) {
       setError("Please enter a valid path");
@@ -73,8 +74,8 @@ function DiagramGenerator() {
       <div className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="text-gray-400 hover:text-white transition-colors flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,12 +94,16 @@ function DiagramGenerator() {
         {/* Hero Section */}
         <header className="mb-12 text-center">
           <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 mb-4">
-            Architecture Diagram Generator
+            Code Architecture & Documentation
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Analyze your codebase and generate beautiful, interactive architecture diagrams using AI
+            Generate architecture diagrams and comprehensive documentation for your projects
           </p>
         </header>
+
+        {/* Architecture Section */}
+
+
 
         {/* Input Section */}
         <div className="mb-8 bg-gray-900 p-8 rounded-2xl border border-gray-800 shadow-2xl">
@@ -225,7 +230,10 @@ function DiagramGenerator() {
             </p>
           </div>
         )}
+
       </div>
+
+
     </div>
   )
 }

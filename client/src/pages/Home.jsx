@@ -4,38 +4,20 @@ export default function Home() {
   const services = [
     {
       id: 1,
-      title: "Architecture Diagram Generator",
-      description: "Generate beautiful architecture diagrams from your codebase using AI",
-      icon: "📊",
+      title: "Code Architecture & Documentation",
+      description: "Generate architecture diagrams and comprehensive documentation for your projects",
+      icon: "📊 📚",
       route: "/diagram-generator",
-      color: "from-blue-500 to-purple-600",
+      color: "from-blue-500 via-purple-500 to-pink-500",
       available: true
     },
     {
       id: 2,
-      title: "Code Documentation",
-      description: "Automatically generate comprehensive documentation for your projects",
-      icon: "📚",
-      route: "/documentation",
-      color: "from-green-500 to-teal-600",
-      available: false
-    },
-    {
-      id: 3,
-      title: "API Analyzer",
-      description: "Analyze and visualize your API endpoints and dependencies",
-      icon: "🔌",
-      route: "/api-analyzer",
-      color: "from-orange-500 to-red-600",
-      available: false
-    },
-    {
-      id: 4,
       title: "Code Quality Insights",
       description: "Get AI-powered insights on code quality and improvements",
       icon: "⚡",
-      route: "/code-insights",
-      color: "from-purple-500 to-pink-600",
+      route: "#",
+      color: "from-orange-500 to-red-500",
       available: false
     }
   ];
@@ -63,12 +45,14 @@ export default function Home() {
       </div>
 
       {/* Services Grid */}
-      <div className="max-w-7xl mx-auto px-8 py-16">
-        <h2 className="text-3xl font-bold mb-12 text-center">Our Services</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-          {services.map((service) => (
-            <ServiceCard key={service.id} service={service} />
-          ))}
+      <div className="max-w-7xl mx-auto px-8 py-16 flex justify-center">
+        <div className="w-full max-w-6xl">
+          <h2 className="text-3xl font-bold mb-12 text-center">Our Services</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {services.map((service) => (
+              <ServiceCard key={service.id} service={service} />
+            ))}
+          </div>
         </div>
       </div>
 
@@ -118,7 +102,7 @@ function ServiceCard({ service }) {
   };
 
   const CardContent = () => (
-    <div 
+    <div
       className={`relative h-full bg-gray-900 rounded-xl border border-gray-800 p-8 hover:border-gray-700 hover:shadow-2xl group ${!service.available ? 'opacity-60' : ''}`}
       style={{
         transformStyle: 'preserve-3d',
@@ -128,17 +112,17 @@ function ServiceCard({ service }) {
       onMouseLeave={handleMouseLeave}
     >
       <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-10 rounded-xl transition-opacity duration-300`}></div>
-      
-      <div className="relative z-10">
-        <div className="text-5xl mb-4 transition-transform duration-300 group-hover:scale-110">{service.icon}</div>
-        <h3 className="text-2xl font-bold mb-3 flex items-center gap-2">
+
+      <div className="relative z-10 flex flex-col items-center text-center">
+        <div className="text-6xl mb-6 transition-transform duration-300 group-hover:scale-110">{service.icon}</div>
+        <h3 className="text-3xl font-bold mb-4 flex items-center justify-center gap-3">
           {service.title}
           {!service.available && (
             <span className="text-xs bg-gray-800 text-gray-400 px-2 py-1 rounded-full">Coming Soon</span>
           )}
         </h3>
-        <p className="text-gray-400 mb-6">{service.description}</p>
-        
+        <p className="text-xl text-gray-400 mb-8 max-w-lg">{service.description}</p>
+
         <div className={`inline-flex items-center gap-2 text-sm font-semibold ${service.available ? 'text-blue-400' : 'text-gray-500'}`}>
           {service.available ? (
             <>
