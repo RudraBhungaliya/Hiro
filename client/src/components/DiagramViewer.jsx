@@ -35,7 +35,7 @@ const DiagramViewer = ({ chart }) => {
     }
 
     return (
-        <div className="diagram-viewer w-full h-[600px] bg-gray-900 rounded-lg shadow-xl border border-gray-700 overflow-hidden relative">
+        <div className="diagram-viewer w-full h-[88vh] bg-gray-900 rounded-lg shadow-xl border border-gray-700 overflow-hidden relative">
             <TransformWrapper
                 initialScale={1}
                 minScale={0.5}

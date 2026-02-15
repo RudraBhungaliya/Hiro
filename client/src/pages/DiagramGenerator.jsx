@@ -1,13 +1,19 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import DiagramViewer from '../components/DiagramViewer'
+import AnalysisPanel from '../components/AnalysisPanel'
+import InsightsPanel from '../components/InsightsPanel'
+import { MOCK_ANALYSIS_RESPONSE } from '../data/mockData'
 
 function DiagramGenerator() {
   const [path, setPath] = useState('');
   const [diagram, setDiagram] = useState('');
+  const [analysisData, setAnalysisData] = useState(null);
+  const [insightsData, setInsightsData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [diagramCode, setDiagramCode] = useState('');
+  const [activeTab, setActiveTab] = useState('diagram');
 
 
   const handleAnalyze = async () => {
@@ -19,25 +25,28 @@ function DiagramGenerator() {
     setError(null);
     setDiagram('');
     setDiagramCode('');
+    setAnalysisData(null);
+    setInsightsData(null);
 
     try {
-      const response = await fetch('http://localhost:8000/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path }),
-      });
+      // For now, we will simulate a backend call with a timeout
+      // In the future, this will be the actual API call
+      // const response = await fetch('http://localhost:8000/api/analyze', ...);
 
-      const data = await response.json();
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
 
-      if (!response.ok) {
-        throw new Error(data.detail || 'Analysis failed');
-      }
+      // Use mock data
+      const data = MOCK_ANALYSIS_RESPONSE;
 
       setDiagram(data.mermaid);
       setDiagramCode(data.mermaid);
+      setAnalysisData(data.analysis);
+      setInsightsData(data.insights);
+      setActiveTab('diagram');
+
     } catch (err) {
       console.error(err);
-      setError(err.message || "Failed to connect to backend. Make sure the server is running on port 8000.");
+      setError(err.message || "Failed to analyze project.");
     } finally {
       setLoading(false);
     }
@@ -90,7 +99,7 @@ function DiagramGenerator() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 py-12">
+      <div className="w-full h-full px-4 py-6">
         {/* Hero Section */}
         <header className="mb-12 text-center">
           <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 mb-4">
@@ -193,7 +202,7 @@ function DiagramGenerator() {
           )}
         </div>
 
-        {/* Diagram Display */}
+        {/* Results Section */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <div className="relative">
@@ -206,16 +215,64 @@ function DiagramGenerator() {
 
         {!loading && diagram && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-200 flex items-center gap-3">
-                <span className="text-3xl">🎨</span>
-                Generated Diagram
-              </h2>
-              <div className="text-sm text-gray-400">
-                Use mouse wheel to zoom, drag to pan
-              </div>
+            {/* Tabs */}
+            <div className="flex gap-2 border-b border-gray-800 mb-6">
+              <button
+                onClick={() => setActiveTab('diagram')}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${activeTab === 'diagram'
+                  ? 'border-blue-500 text-blue-400'
+                  : 'border-transparent text-gray-400 hover:text-gray-200'
+                  }`}
+              >
+                Architecture Diagram
+              </button>
+              <button
+                onClick={() => setActiveTab('analysis')}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${activeTab === 'analysis'
+                  ? 'border-blue-500 text-blue-400'
+                  : 'border-transparent text-gray-400 hover:text-gray-200'
+                  }`}
+              >
+                Code Analysis
+              </button>
+              <button
+                onClick={() => setActiveTab('insights')}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${activeTab === 'insights'
+                  ? 'border-blue-500 text-blue-400'
+                  : 'border-transparent text-gray-400 hover:text-gray-200'
+                  }`}
+              >
+                Insights
+              </button>
             </div>
-            <DiagramViewer chart={diagram} />
+
+            {/* Tab Content */}
+            {activeTab === 'diagram' && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold text-gray-200 flex items-center gap-3">
+                    <span className="text-3xl">🎨</span>
+                    Generated Diagram
+                  </h2>
+                  <div className="text-sm text-gray-400">
+                    Use mouse wheel to zoom, drag to pan
+                  </div>
+                </div>
+                <DiagramViewer chart={diagram} />
+              </div>
+            )}
+
+            {activeTab === 'analysis' && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <AnalysisPanel data={analysisData} />
+              </div>
+            )}
+
+            {activeTab === 'insights' && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <InsightsPanel data={insightsData} />
+              </div>
+            )}
           </div>
         )}
 
