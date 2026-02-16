@@ -15,6 +15,10 @@ function DiagramGenerator() {
   const [diagramCode, setDiagramCode] = useState('');
   const [activeTab, setActiveTab] = useState('diagram');
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
   const handleAnalyze = async () => {
     if (!path.trim()) {
       setError("Please enter a valid path");
@@ -102,6 +106,7 @@ function DiagramGenerator() {
         {/* Hero Section */}
         <header className="mb-12 text-center">
           <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 mb-4">
+<<<<<<< HEAD
             Architecture Diagram Generator
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
@@ -109,6 +114,19 @@ function DiagramGenerator() {
           </p>
         </header>
 
+=======
+            Code Architecture & Documentation
+          </h1>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+            Generate architecture diagrams and comprehensive documentation for your projects
+          </p>
+        </header>
+
+        {/* Architecture Section */}
+
+
+
+>>>>>>> origin/main
         {/* Input Section */}
         <div className="mb-8 bg-gray-900 p-8 rounded-2xl border border-gray-800 shadow-2xl">
           <label className="block text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wide">
@@ -282,7 +300,14 @@ function DiagramGenerator() {
             </p>
           </div>
         )}
+<<<<<<< HEAD
       </div>
+=======
+
+      </div>
+
+
+>>>>>>> origin/main
     </div>
   )
 }
