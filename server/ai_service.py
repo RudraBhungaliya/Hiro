@@ -1,5 +1,5 @@
-# Mock data response matching the frontend structure
-# Mock data response matching the frontend structure
+import copy
+
 MOCK_ANALYSIS_RESPONSE = {
     "mermaid": """graph TD
     1["Database"]
@@ -73,30 +73,20 @@ MOCK_ANALYSIS_RESPONSE = {
 
 def analyze_codebase(files):
     """
-    This function should interface with the AI model.
-    Input: list of file dicts {name, path, content, type}
-    Output: JSON structure with mermaid code and analysis insights.
+    Interface for AI model integration.
+    Currently returns mock data.
     """
     
-    # TODO: Integrate with actual AI model here.
-    # Code would look something like:
-    # prompt = create_prompt(files)
-    # response = ai_client.chat.completions.create(...)
-    # return parse_response(response)
+    # Placeholder for AI model integration
+    # Friend will implement the model call here
     
-    print(f"Received {len(files)} files for analysis.")
-    
-    # For now, return mock data
-    # We can perform some simple analysis on the 'files' to make it slightly dynamic if we wanted,
-    # but for MVP, fixed mock data is safer to ensure frontend renders correctly first.
-    
-    response = MOCK_ANALYSIS_RESPONSE.copy()
+    response = copy.deepcopy(MOCK_ANALYSIS_RESPONSE)
     response["analysis"]["fileCount"] = len(files)
     
-    # Simple language detection based on files
+    # Simple language detection
     languages = set()
     for f in files:
-        if f['type'] == 'js' or f['type'] == 'jsx':
+        if f['type'] in ['js', 'jsx', 'ts', 'tsx']:
             languages.add("JavaScript")
         elif f['type'] == 'py':
             languages.add("Python")
@@ -104,6 +94,10 @@ def analyze_codebase(files):
             languages.add("HTML")
         elif f['type'] == 'css':
             languages.add("CSS")
+        elif f['type'] == 'java':
+            languages.add("Java")
+        elif f['type'] == 'cpp' or f['type'] == 'h':
+            languages.add("C++")
             
     response["analysis"]["languages"] = list(languages)
     

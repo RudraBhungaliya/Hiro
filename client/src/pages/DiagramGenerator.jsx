@@ -113,13 +113,9 @@ function DiagramGenerator() {
             Code Architecture & Documentation
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Generate architecture diagrams and comprehensive documentation for your projects
+            Analyze your codebase and generate beautiful, interactive architecture diagrams using AI
           </p>
         </header>
-
-        {/* Architecture Section */}
-
-
 
         {/* Input Section */}
         <div className="mb-8 bg-gray-900 p-8 rounded-2xl border border-gray-800 shadow-2xl">
@@ -294,10 +290,7 @@ function DiagramGenerator() {
             </p>
           </div>
         )}
-
       </div>
-
-
     </div>
   )
 }

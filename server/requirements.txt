@@ -1,2 +1,6 @@
 flask
 flask-cors
+fastapi
+uvicorn
+pydantic
+python-multipart
