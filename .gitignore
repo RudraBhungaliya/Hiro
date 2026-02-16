@@ -1,0 +1,4 @@
+.env
+venv/
+__pycache__/
+analyse_testing.py
