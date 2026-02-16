@@ -6,6 +6,12 @@ mermaid.initialize({
     startOnLoad: true,
     theme: 'dark',
     securityLevel: 'loose',
+    maxTextSize: 90000,
+    flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: 'basis'
+    }
 });
 
 const DiagramViewer = ({ chart }) => {
@@ -28,14 +34,14 @@ const DiagramViewer = ({ chart }) => {
 
     if (!chart) {
         return (
-            <div className="diagram-viewer w-full p-4 bg-gray-900 rounded-lg shadow-xl border border-gray-700 min-h-[400px] flex items-center justify-center text-gray-500">
+            <div className="diagram-viewer w-full p-4 bg-gray-900 rounded-lg shadow-xl border border-gray-700 min-h-100 flex items-center justify-center text-gray-500">
                 No diagram generated yet
             </div>
         )
     }
 
     return (
-        <div className="diagram-viewer w-full h-[88vh] bg-gray-900 rounded-lg shadow-xl border border-gray-700 overflow-hidden relative">
+        <div className="diagram-viewer w-full h-[90vh] bg-gray-900 rounded-lg shadow-xl border border-gray-700 overflow-hidden relative">
             <TransformWrapper
                 initialScale={1}
                 minScale={0.5}

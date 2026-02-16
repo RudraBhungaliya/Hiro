@@ -10,33 +10,6 @@ export default function Home() {
       route: "/diagram-generator",
       color: "from-blue-500 via-purple-500 to-pink-500",
       available: true
-    },
-    {
-      id: 2,
-      title: "Code Documentation",
-      description: "Automatically generate comprehensive documentation for your projects",
-      icon: "📚",
-      route: "/documentation",
-      color: "from-green-500 to-teal-600",
-      available: false
-    },
-    {
-      id: 3,
-      title: "API Analyzer",
-      description: "Analyze and visualize your API endpoints and dependencies",
-      icon: "🔌",
-      route: "/api-analyzer",
-      color: "from-orange-500 to-red-600",
-      available: false
-    },
-    {
-      id: 4,
-      title: "Code Quality Insights",
-      description: "Get AI-powered insights on code quality and improvements",
-      icon: "⚡",
-      route: "/code-insights",
-      color: "from-purple-500 to-pink-600",
-      available: false
     }
   ];
 
@@ -44,11 +17,11 @@ export default function Home() {
     <div className="min-h-screen bg-gray-950 text-white">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10"></div>
         <div className="relative max-w-7xl mx-auto px-8 py-20">
           <div className="text-center">
             <h1 className="text-6xl font-bold mb-6">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
+              <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-400 via-purple-500 to-pink-500">
                 Hiro
               </span>
             </h1>
@@ -129,7 +102,7 @@ function ServiceCard({ service }) {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-10 rounded-xl transition-opacity duration-300`}></div>
+      <div className={`absolute inset-0 bg-linear-to-br ${service.color} opacity-0 group-hover:opacity-10 rounded-xl transition-opacity duration-300`}></div>
 
       <div className="relative z-10 flex flex-col items-center text-center">
         <div className="text-6xl mb-6 transition-transform duration-300 group-hover:scale-110">{service.icon}</div>

@@ -29,14 +29,21 @@ function DiagramGenerator() {
     setInsightsData(null);
 
     try {
-      // For now, we will simulate a backend call with a timeout
-      // In the future, this will be the actual API call
-      // const response = await fetch('http://localhost:8000/api/analyze', ...);
+      // Call the Python backend
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path }),
+      });
 
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to analyze project");
+      }
 
-      // Use mock data
-      const data = MOCK_ANALYSIS_RESPONSE;
+      const data = await response.json();
 
       setDiagram(data.mermaid);
       setDiagramCode(data.mermaid);
@@ -102,7 +109,7 @@ function DiagramGenerator() {
       <div className="w-full h-full px-4 py-6">
         {/* Hero Section */}
         <header className="mb-12 text-center">
-          <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 mb-4">
+          <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-400 via-purple-500 to-pink-500 mb-4">
             Code Architecture & Documentation
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
@@ -134,7 +141,7 @@ function DiagramGenerator() {
               className={`px-10 py-4 rounded-xl font-semibold transition-all flex items-center gap-3 shadow-lg
                 ${loading
                   ? 'bg-gray-700 cursor-not-allowed text-gray-400'
-                  : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-blue-500/30'
+                  : 'bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-blue-500/30'
                 }`}
             >
               {loading ? (
@@ -178,7 +185,7 @@ function DiagramGenerator() {
                 </button>
                 <button
                   onClick={handleDownloadSVG}
-                  className="text-sm px-4 py-2 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-500 hover:to-teal-500 rounded-lg text-white transition-all flex items-center gap-2"
+                  className="text-sm px-4 py-2 bg-linear-to-r from-green-600 to-teal-600 hover:from-green-500 hover:to-teal-500 rounded-lg text-white transition-all flex items-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -191,7 +198,7 @@ function DiagramGenerator() {
 
           {error && (
             <div className="mt-6 p-5 bg-red-900/20 border border-red-800/50 rounded-xl text-red-200 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
               <div>
