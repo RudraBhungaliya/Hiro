@@ -7,9 +7,9 @@ from models.renderer import render
 app = FastAPI()
 
 
-class ParseRequest(BaseModel):
-    mode: str    # "file" or "folder"
-    target: str  # path to .py file or project folder
+class parserequest(BaseModel):
+    mode: str  
+    target: str 
 
 
 @app.post("/analyze")
