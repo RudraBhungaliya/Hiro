@@ -2,13 +2,11 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import DiagramViewer from '../components/DiagramViewer'
 import AnalysisPanel from '../components/AnalysisPanel'
-import { MOCK_ANALYSIS_RESPONSE } from '../data/mockData'
 import { generateArchitectureReport } from '../utils/reportGenerator'
 
 function DiagramGenerator() {
   const [path, setPath] = useState('');
   const [diagram, setDiagram] = useState('');
-  // analysisData will now hold the documentation string
   const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -27,18 +25,31 @@ function DiagramGenerator() {
     setAnalysisData(null);
 
     try {
-      // For now, we will simulate a backend call with a timeout
-      // In the future, this will be the actual API call
-      // const response = await fetch('http://localhost:8000/api/analyze', ...);
+      const response = await fetch('http://localhost:8000/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          path: path.trim(),
+          mode: "auto"
+        }),
+      });
 
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to analyze project");
+      }
 
-      // Use mock data
-      const data = MOCK_ANALYSIS_RESPONSE;
+      const data = await response.json();
 
-      setDiagram(data.diagram);
-      setDiagramCode(data.diagram);
-      setAnalysisData(data.documentation);
+      if (!data.success) {
+        throw new Error("Analysis failed");
+      }
+
+      setDiagram(data.mermaid);
+      setDiagramCode(data.mermaid);
+      setAnalysisData(data.description);
       setActiveTab('diagram');
 
     } catch (err) {
@@ -60,7 +71,7 @@ function DiagramGenerator() {
   };
 
   const handleDownloadSVG = () => {
-    const svg = document.querySelector('.diagram-viewer svg');
+    const svg = document.querySelector('.mermaid-diagram svg');
     if (svg) {
       const svgData = new XMLSerializer().serializeToString(svg);
       const blob = new Blob([svgData], { type: 'image/svg+xml' });
@@ -112,10 +123,6 @@ function DiagramGenerator() {
           </p>
         </header>
 
-        {/* Architecture Section */}
-
-
-
         {/* Input Section */}
         <div className="mb-8 bg-gray-900 p-8 rounded-2xl border border-gray-800 shadow-2xl">
           <label className="block text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wide">
@@ -127,7 +134,7 @@ function DiagramGenerator() {
               value={path}
               onChange={(e) => setPath(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="e.g., C:\Users\Name\Projects\MyProject"
+              placeholder="e.g., /Users/Name/Projects/MyProject or https://github.com/user/repo"
               className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-5 py-4 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none transition-all"
             />
             <button
@@ -160,11 +167,11 @@ function DiagramGenerator() {
 
           <div className="mt-5 flex flex-wrap gap-3">
             <button
-              onClick={() => setPath("C:\\Users\\Rudra\\Desktop\\Projects\\Hiro\\server")}
+              onClick={() => setPath("https://github.com/fastapi/fastapi")}
               className="text-sm px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-gray-300 hover:text-white transition-all flex items-center gap-2"
             >
               <span>📁</span>
-              Try Demo Path (Hiro Server)
+              Try Demo (GitHub Repo)
             </button>
             <div className="flex-1"></div>
             {diagram && (
@@ -208,6 +215,12 @@ function DiagramGenerator() {
               <div>
                 <p className="font-semibold mb-1">Analysis Failed</p>
                 <p className="text-sm text-red-300">{error}</p>
+                {/* Helpful tip for connection errors */}
+                {error.includes("Failed to fetch") && (
+                  <p className="text-xs text-red-400 mt-2">
+                    Tip: Ensure the backend server is running on port 8000.
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -221,6 +234,7 @@ function DiagramGenerator() {
               <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-purple-500 rounded-full animate-spin animation-delay-150"></div>
             </div>
             <p className="text-gray-400 text-lg">Analyzing your project structure...</p>
+            <p className="text-gray-500 text-sm">This may take a moment (AI models are thinking...)</p>
           </div>
         )}
 
@@ -279,14 +293,12 @@ function DiagramGenerator() {
               Ready to Visualize Your Code
             </h3>
             <p className="text-gray-500 max-w-md mx-auto">
-              Enter your project path above and click "Generate Diagram" to create an interactive architecture visualization
+              Enter your project path above to generate an interactive architecture visualization
             </p>
           </div>
         )}
 
       </div>
-
-
     </div>
   )
 }
