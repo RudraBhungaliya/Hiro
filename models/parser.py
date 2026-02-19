@@ -20,14 +20,15 @@ def read_file(filepath):
 
 def extract_with_ast(code):
     """
-    Use Python's built-in AST to extract facts directly from code.
-    Returns classes, their methods, dependencies, and imports.
+    Using Python's built-in AST to extract facts directly from code.
+    Returns classes, methods, dependencies, imports, and function calls.
     """
     tree = ast.parse(code)
     facts = {
         "classes": [],
         "imports": [],
-        "functions": []
+        "functions": [],
+        "calls": []
     }
 
     all_class_names = [
@@ -35,13 +36,19 @@ def extract_with_ast(code):
         if isinstance(node, ast.ClassDef)
     ]
 
-    # Track method names to exclude from top level functions
     method_names = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.ClassDef):
             for item in node.body:
                 if isinstance(item, ast.FunctionDef):
                     method_names.add(item.name)
+
+    # Collecting all top level function names first
+    all_function_names = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            if node.name not in method_names and node.name != "__init__":
+                all_function_names.append(node.name)
 
     for node in ast.walk(tree):
 
@@ -55,7 +62,6 @@ def extract_with_ast(code):
                     if item.name != "__init__":
                         methods.append(item.name)
 
-                    # Strategy 1 — match constructor arg names to class names
                     if item.name == "__init__":
                         for arg in item.args.args:
                             arg_name = arg.arg.lower()
@@ -72,8 +78,6 @@ def extract_with_ast(code):
                                     arg_name in stripped):
                                     dependencies.add(class_name)
 
-                    # Strategy 2 — detect self.x.method() calls
-                    # If self.db.query() is called, find what class has query()
                     for sub_node in ast.walk(item):
                         if isinstance(sub_node, ast.Attribute):
                             if isinstance(sub_node.value, ast.Attribute):
@@ -83,7 +87,6 @@ def extract_with_ast(code):
                                         for other_cls in all_class_names:
                                             if other_cls == node.name:
                                                 continue
-                                            # Check if that method belongs to another class
                                             for other_node in ast.walk(tree):
                                                 if isinstance(other_node, ast.ClassDef):
                                                     if other_node.name == other_cls:
@@ -100,10 +103,27 @@ def extract_with_ast(code):
                 "dependencies": list(dependencies)
             })
 
-        # Top level functions only
+        # Top level functions + call detection
         if isinstance(node, ast.FunctionDef):
             if node.name not in method_names and node.name != "__init__":
                 facts["functions"].append(node.name)
+
+                for sub_node in ast.walk(node):
+                    if isinstance(sub_node, ast.Call):
+                        if isinstance(sub_node.func, ast.Name):
+                            called = sub_node.func.id
+                            if called in all_function_names and called != node.name:
+                                facts["calls"].append({
+                                    "from": node.name,
+                                    "to": called
+                                })
+                        elif isinstance(sub_node.func, ast.Attribute):
+                            called = sub_node.func.attr
+                            if called in all_function_names and called != node.name:
+                                facts["calls"].append({
+                                    "from": node.name,
+                                    "to": called
+                                })
 
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -112,6 +132,16 @@ def extract_with_ast(code):
         if isinstance(node, ast.ImportFrom):
             if node.module:
                 facts["imports"].append(node.module)
+
+    # Deduplicate calls
+    seen = set()
+    unique_calls = []
+    for call in facts["calls"]:
+        key = f"{call['from']}->{call['to']}"
+        if key not in seen:
+            seen.add(key)
+            unique_calls.append(call)
+    facts["calls"] = unique_calls
 
     return facts
 
@@ -133,7 +163,6 @@ def extract_with_ai(facts):
     if facts["classes"]:
         class_id_map = {}
 
-        # First pass — create all class nodes
         for cls in facts["classes"]:
             class_node_id = next_id()
             class_id_map[cls["name"]] = class_node_id
@@ -143,7 +172,6 @@ def extract_with_ai(facts):
                 "type": "class"
             })
 
-        # Second pass — create method nodes and dependency edges
         for cls in facts["classes"]:
             class_node_id = class_id_map[cls["name"]]
 
@@ -169,36 +197,31 @@ def extract_with_ai(facts):
                     })
 
     else:
+        # Procedural code — use functions with call relationships
+        func_id_map = {}
+
         for func in facts.get("functions", []):
             func_id = next_id()
+            func_id_map[func] = func_id
             nodes.append({
                 "id": func_id,
                 "label": func,
                 "type": "function"
             })
 
+        # Add call edges
+        for call in facts.get("calls", []):
+            from_func = call["from"]
+            to_func = call["to"]
+            if from_func in func_id_map and to_func in func_id_map:
+                edges.append({
+                    "from": func_id_map[from_func],
+                    "to": func_id_map[to_func],
+                    "label": "calls"
+                })
+
     return {"nodes": nodes, "edges": edges}
 
-def parse_file(filepath):
-    """
-    Master function — give it a file path, get back nodes, edges and description.
-    """
-    print(f"Reading {filepath}...")
-    code = read_file(filepath)
-
-    print("Extracting structure with AST...")
-    facts = extract_with_ast(code)
-    print(f"  Found {len(facts['classes'])} classes, {len(facts['imports'])} imports")
-
-    diagram_data = extract_with_ai(facts)
-    print(f"  Got {len(diagram_data['nodes'])} nodes, {len(diagram_data['edges'])} edges")
-
-    print("Generating description...")
-    description = generate_description(facts, diagram_data)
-
-    diagram_data["description"] = description
-
-    return diagram_data
 
 def generate_description(facts, diagram_data):
     """
@@ -206,14 +229,24 @@ def generate_description(facts, diagram_data):
     of the codebase based on extracted facts.
     """
     class_summary = []
-    for cls in facts["classes"]:
-        class_summary.append(
-            f"- {cls['name']}: methods are {cls['methods']}, depends on {cls['dependencies']}"
-        )
+
+    if facts["classes"]:
+        for cls in facts["classes"]:
+            class_summary.append(
+                f"- {cls['name']}: methods are {cls['methods']}, depends on {cls['dependencies']}"
+            )
+        subject = "classes"
+    else:
+        for func in facts.get("functions", []):
+            class_summary.append(f"- function: {func}")
+        subject = "functions"
+
+    if not class_summary:
+        return "No analyzable structure found."
 
     prompt = f"""
 You are an expert software architect reviewing a codebase.
-Based on these facts, write a clean plain English description.
+Based on these {subject}, write a clean plain English description.
 
 Facts:
 {chr(10).join(class_summary)}
@@ -224,7 +257,7 @@ Overview:
 [2-3 sentences describing what this codebase does overall]
 
 Components:
-[For each class, one bullet point: ClassName — what it does and who it depends on]
+[For each {subject[:-1]}, one bullet point describing what it does]
 
 Architecture Pattern:
 [One sentence identifying the architecture pattern]
@@ -242,6 +275,29 @@ Keep it concise and professional. No markdown. No extra text.
     )
 
     return response.json()["response"].strip()
+
+
+def parse_file(filepath):
+    """
+    Master function — give it a file path, get back nodes, edges and description.
+    """
+    print(f"Reading {filepath}...")
+    code = read_file(filepath)
+
+    print("Extracting structure with AST...")
+    facts = extract_with_ast(code)
+    print(f"  Found {len(facts['classes'])} classes, {len(facts['imports'])} imports")
+
+    diagram_data = extract_with_ai(facts)
+    print(f"  Got {len(diagram_data['nodes'])} nodes, {len(diagram_data['edges'])} edges")
+
+    print("Generating description...")
+    description = generate_description(facts, diagram_data)
+    print(f"Description preview: {description[:100]}")
+
+    diagram_data["description"] = description
+
+    return diagram_data
 
 
 if __name__ == "__main__":
