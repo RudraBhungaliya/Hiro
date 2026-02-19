@@ -2,19 +2,18 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import DiagramViewer from '../components/DiagramViewer'
 import AnalysisPanel from '../components/AnalysisPanel'
-import InsightsPanel from '../components/InsightsPanel'
 import { MOCK_ANALYSIS_RESPONSE } from '../data/mockData'
+import { generateArchitectureReport } from '../utils/reportGenerator'
 
 function DiagramGenerator() {
   const [path, setPath] = useState('');
   const [diagram, setDiagram] = useState('');
+  // analysisData will now hold the documentation string
   const [analysisData, setAnalysisData] = useState(null);
-  const [insightsData, setInsightsData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [diagramCode, setDiagramCode] = useState('');
   const [activeTab, setActiveTab] = useState('diagram');
-
 
   const handleAnalyze = async () => {
     if (!path.trim()) {
@@ -26,7 +25,6 @@ function DiagramGenerator() {
     setDiagram('');
     setDiagramCode('');
     setAnalysisData(null);
-    setInsightsData(null);
 
     try {
       // For now, we will simulate a backend call with a timeout
@@ -38,10 +36,9 @@ function DiagramGenerator() {
       // Use mock data
       const data = MOCK_ANALYSIS_RESPONSE;
 
-      setDiagram(data.mermaid);
-      setDiagramCode(data.mermaid);
-      setAnalysisData(data.analysis);
-      setInsightsData(data.insights);
+      setDiagram(data.diagram);
+      setDiagramCode(data.diagram);
+      setAnalysisData(data.documentation);
       setActiveTab('diagram');
 
     } catch (err) {
@@ -55,6 +52,11 @@ function DiagramGenerator() {
   const handleCopyCode = () => {
     navigator.clipboard.writeText(diagramCode);
     // You could add a toast notification here
+  };
+
+  const handleDownloadReport = () => {
+    // analysisData is the documentation string
+    generateArchitectureReport(diagramCode, analysisData);
   };
 
   const handleDownloadSVG = () => {
@@ -185,6 +187,15 @@ function DiagramGenerator() {
                   </svg>
                   Download SVG
                 </button>
+                <button
+                  onClick={handleDownloadReport}
+                  className="text-sm px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg text-white transition-all flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Download Report
+                </button>
               </>
             )}
           </div>
@@ -233,16 +244,7 @@ function DiagramGenerator() {
                   : 'border-transparent text-gray-400 hover:text-gray-200'
                   }`}
               >
-                Code Analysis
-              </button>
-              <button
-                onClick={() => setActiveTab('insights')}
-                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${activeTab === 'insights'
-                  ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-gray-400 hover:text-gray-200'
-                  }`}
-              >
-                Insights
+                Project Documentation
               </button>
             </div>
 
@@ -265,12 +267,6 @@ function DiagramGenerator() {
             {activeTab === 'analysis' && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <AnalysisPanel data={analysisData} />
-              </div>
-            )}
-
-            {activeTab === 'insights' && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <InsightsPanel data={insightsData} />
               </div>
             )}
           </div>

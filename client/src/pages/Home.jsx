@@ -12,30 +12,9 @@ export default function Home() {
       available: true
     },
     {
-      id: 2,
-      title: "Code Documentation",
-      description: "Automatically generate comprehensive documentation for your projects",
-      icon: "📚",
-      route: "/documentation",
-      color: "from-green-500 to-teal-600",
-      available: false
-    },
-    {
       id: 3,
       title: "API Analyzer",
-      description: "Analyze and visualize your API endpoints and dependencies",
-      icon: "🔌",
-      route: "/api-analyzer",
       color: "from-orange-500 to-red-600",
-      available: false
-    },
-    {
-      id: 4,
-      title: "Code Quality Insights",
-      description: "Get AI-powered insights on code quality and improvements",
-      icon: "⚡",
-      route: "/code-insights",
-      color: "from-purple-500 to-pink-600",
       available: false
     }
   ];

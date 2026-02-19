@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+.mermaid-diagram svg {
+    max-width: none !important;
+    height: auto !important;
+}

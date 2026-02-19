@@ -1,0 +1,26 @@
+{
+  "name": "hiro",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/RudraBhungaliya/Hiro#readme",
+  "bugs": {
+    "url": "https://github.com/RudraBhungaliya/Hiro/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RudraBhungaliya/Hiro.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "server": "npm start --prefix server",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "start": "npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
