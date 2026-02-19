@@ -1,7 +1,10 @@
+from pathlib import Path
+
+
 def json_to_mermaid(diagram_data):
     """
     Converts nodes and edges JSON into Mermaid diagram syntax.
-    Returns mermaid code + description as one clean string.
+    Returns mermaid code as a clean string.
     """
     lines = ["graph TD"]
 
@@ -25,14 +28,36 @@ def json_to_mermaid(diagram_data):
         label = edge["label"]
         lines.append(f'    {from_id} -->|{label}| {to_id}')
 
-    # Append description below the diagram
-    if "description" in diagram_data and diagram_data["description"]:
-        lines.append("")
-        lines.append("")
-        lines.append("%% ─────────────────────────────────────────")
-        lines.append("%% HIRO Analysis")
-        lines.append("%% ─────────────────────────────────────────")
-        for line in diagram_data["description"].split("\n"):
-            lines.append(f"%% {line}")
-
     return "\n".join(lines)
+
+
+def get_description(diagram_data):
+    """Safely extract description from diagram data."""
+    return diagram_data.get("description", "")
+
+
+def render(diagram_data, output_path="diagram.mmd"):
+    """
+    Master render function.
+    Prints and saves Mermaid code and description.
+    """
+    mermaid_code = json_to_mermaid(diagram_data)
+    description = get_description(diagram_data)
+
+    print("=== MERMAID CODE ===")
+    print(mermaid_code)
+    print()
+
+    if description:
+        print("=== DESCRIPTION ===")
+        print(description)
+        print()
+
+    output = mermaid_code
+    if description:
+        output += f"\n\n---\n{description}"
+
+    Path(output_path).write_text(output)
+    print(f"Saved → {output_path}")
+
+    return mermaid_code, description
