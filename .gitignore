@@ -1,4 +1,18 @@
-.env
-venv/
+# Python
 __pycache__/
-analyse_testing.py
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env/
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Logs
+*.log

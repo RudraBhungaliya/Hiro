@@ -1,0 +1,21 @@
+
+.user-profile {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+#user-list {
+    margin: 20px 0;
+}
+
+@media (max-width: 768px) {
+    .user-profile {
+        padding: 10px;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HIRO — Multi-Language Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #08090d;
+            min-height: 100vh;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            max-width: 1400px;
+            width: 100%;
+        }
+        
+        .header h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 span {
+            color: #7DF9C2;
+        }
+        
+        .header p {
+            color: #555670;
+            font-size: 11px;
+            margin-top: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+            max-width: 1400px;
+            width: 100%;
+        }
+        
+        .stat-card {
+            background: #0f1018;
+            border: 1px solid #1c1d2e;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 48px;
+            font-weight: 800;
+            color: #7DF9C2;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #555670;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .lang-badges {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .lang-badge {
+            background: #0f1018;
+            border: 2px solid;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .lang-icon {
+            font-size: 20px;
+        }
+        
+        .lang-name {
+            color: #dde0f0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .lang-count {
+            background: rgba(125, 249, 194, 0.2);
+            color: #7DF9C2;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .diagram-wrapper {
+            width: 100%;
+            max-width: 1400px;
+            background: #0f1018;
+            border: 1px solid #1c1d2e;
+            padding: 50px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            overflow-y: auto;
+            min-height: 500px;
+            max-height: 85vh;
+            position: relative;
+        }
+        
+        .diagram-label {
+            font-size: 10px;
+            color: #555670;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .diagram-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #1c1d2e;
+        }
+        
+        .diagram-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            justify-content: flex-end;
+        }
+        
+        .ctrl-btn {
+            background: rgba(125,249,194,0.08);
+            border: 1px solid rgba(125,249,194,0.25);
+            color: #7DF9C2;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            padding: 6px 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .ctrl-btn:hover {
+            background: rgba(125,249,194,0.18);
+        }
+        
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            min-width: max-content;
+        }
+        
+        .mermaid svg {
+            min-width: 800px;
+            height: auto !important;
+            max-height: none !important;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            font-size: 11px;
+            color: #555670;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1><span>HIRO</span> Multi-Language Architecture</h1>
+        <p>Project: test_python.py</p>
+    </div>
+
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">1</div>
+            <div class="stat-label">Languages</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">1</div>
+            <div class="stat-label">Files Analyzed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Cross-Language Links</div>
+        </div>
+    </div>
+    
+    
+    <div class="lang-badges">
+        
+        <div class="lang-badge" style="border-color: #3776ab;">
+            <span class="lang-icon">🐍</span>
+            <span class="lang-name">Python</span>
+            <span class="lang-count">1</span>
+        </div>
+        
+    </div>
+
+    <div class="diagram-wrapper">
+        <div class="diagram-label">Architecture Diagram</div>
+        <div class="diagram-controls">
+            <button class="ctrl-btn" onclick="zoomIn()">+ Zoom In</button>
+            <button class="ctrl-btn" onclick="zoomOut()">− Zoom Out</button>
+            <button class="ctrl-btn" onclick="resetZoom()">Reset</button>
+            <button class="ctrl-btn" onclick="fullscreen()">⛶ Fullscreen</button>
+        </div>
+        <div class="mermaid" id="diagram-container">
+graph TB
+
+    subgraph Python
+        node1["🐍 UserService"]
+        style node1 fill:#3776ab,stroke:#fff,color:#fff
+        node2("get_user")
+        node1 --> node2
+        node3("create_user")
+        node1 --> node3
+        node4["🐍 DatabaseService"]
+        style node4 fill:#3776ab,stroke:#fff,color:#fff
+        node5("query")
+        node4 --> node5
+        node6("insert")
+        node4 --> node6
+    end
+
+        </div>
+    </div>
+
+    <div class="footer">HIRO — AI Powered Developer Platform</div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#14151f',
+                primaryTextColor: '#dde0f0',
+                primaryBorderColor: '#5B6EF5',
+                lineColor: '#7DF9C2',
+                secondaryColor: '#0f1018',
+                tertiaryColor: '#08090d'
+            },
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        let currentZoom = 1;
+
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom + 0.2, 3);
+            applyZoom();
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom - 0.2, 0.3);
+            applyZoom();
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            applyZoom();
+        }
+
+        function applyZoom() {
+            const svg = document.querySelector('#diagram-container svg');
+            if (svg) {
+                svg.style.transform = `scale(${currentZoom})`;
+                svg.style.transformOrigin = 'top center';
+            }
+        }
+
+        function fullscreen() {
+            const wrapper = document.querySelector('.diagram-wrapper');
+            if (!document.fullscreenElement) {
+                wrapper.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+    </script>
+
+</body>
+</html>
