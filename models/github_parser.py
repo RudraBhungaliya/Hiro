@@ -2,20 +2,10 @@ import tempfile
 import shutil
 from pathlib import Path
 from git import Repo
-from models.folder_parser import parse_folder
+from models.multi_language_parser import parse_folder_multi_language
 
 
 def parse_github_repo(repo_url):
-    """
-    Clones a GitHub repository, analyzes it, and returns diagram data.
-    Automatically cleans up after itself.
-    
-    Args:
-        repo_url: GitHub repository URL (https://github.com/user/repo)
-    
-    Returns:
-        dict with nodes, edges, description
-    """
     temp_dir = None
     
     try:
@@ -26,9 +16,9 @@ def parse_github_repo(repo_url):
         print(f"Cloned to {temp_dir}")
         print()
         
-        diagram_data = parse_folder(temp_dir)
+        all_facts = parse_folder_multi_language(temp_dir)
         
-        return diagram_data
+        return all_facts
         
     except Exception as e:
         raise Exception(f"Failed to analyze repository: {str(e)}")
@@ -40,12 +30,9 @@ def parse_github_repo(repo_url):
 
 
 def validate_github_url(url):
-    """Validates that the URL is a proper GitHub repository URL."""
     if not url.startswith(("https://github.com/", "http://github.com/")):
         return False
-    
     parts = url.replace("https://", "").replace("http://", "").split("/")
     if len(parts) < 3:
         return False
-    
     return True
