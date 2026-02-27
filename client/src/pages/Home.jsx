@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import AuthBtn from '../components/AuthBtn';
 
 export default function Home() {
   return (
@@ -6,6 +7,11 @@ export default function Home() {
       {/* Hero / Whiteboard section */}
       <section className="relative overflow-hidden border-b border-orange-100/60 bg-gradient-to-b from-[#fbf7ef] to-[#f4ebdd]">
         <div className="absolute inset-y-0 left-0 w-1 bg-slate-800/50 translate-x-10 sm:translate-x-20" />
+        
+        {/* Auth Button in top right */}
+        <div className="absolute top-6 right-6 z-10">
+          <AuthBtn />
+        </div>
 
         <div className="max-w-6xl mx-auto px-6 sm:px-10 py-16 sm:py-20 lg:py-24 flex flex-col lg:flex-row gap-14 items-center">
           {/* Left: pixel logo + copy */}

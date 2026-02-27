@@ -2,9 +2,12 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import DiagramViewer from '../components/DiagramViewer'
 import AnalysisPanel from '../components/AnalysisPanel'
+import AuthBtn from '../components/AuthBtn'
+import { useUser } from '../context/UserContext'
 import { generateArchitectureReport } from '../utils/reportGenerator'
 
 function DiagramGenerator() {
+  const { user } = useUser();
   const [path, setPath] = useState('');
   const [diagram, setDiagram] = useState('');
   const [analysisData, setAnalysisData] = useState(null);
@@ -14,6 +17,10 @@ function DiagramGenerator() {
   const [activeTab, setActiveTab] = useState('diagram');
 
   const handleAnalyze = async () => {
+    if (!user) {
+      setError("Please sign in with Google to generate diagrams");
+      return;
+    }
     if (!path.trim()) {
       setError("Please enter a valid path");
       return;
@@ -103,8 +110,11 @@ function DiagramGenerator() {
             </svg>
             Back to home
           </Link>
-          <div className="hidden sm:block text-xs text-slate-500">
-            Paste a local folder path or a GitHub URL.
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:block text-xs text-slate-500">
+              Paste a local folder path or a GitHub URL.
+            </div>
+            <AuthBtn />
           </div>
         </div>
       </div>

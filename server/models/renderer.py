@@ -8,7 +8,11 @@ def json_to_mermaid(diagram_data):
     """
     lines = ["graph TD"]
 
-    for node in diagram_data["nodes"]:
+    # Safely handle missing or None nodes/edges
+    nodes = diagram_data.get("nodes") or []
+    edges = diagram_data.get("edges") or []
+
+    for node in nodes:
         node_id = node["id"]
         label = node["label"]
         node_type = node["type"]
@@ -22,7 +26,7 @@ def json_to_mermaid(diagram_data):
 
     lines.append("")
 
-    for edge in diagram_data["edges"]:
+    for edge in edges:
         from_id = edge["from"]
         to_id = edge["to"]
         label = edge["label"]

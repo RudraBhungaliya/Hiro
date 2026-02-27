@@ -227,6 +227,7 @@ def generate_description(facts, diagram_data):
     """
     Uses Ollama to generate a plain English description
     of the codebase based on extracted facts.
+    Falls back to simple description if Ollama is unavailable.
     """
     class_summary = []
 
@@ -265,16 +266,22 @@ Architecture Pattern:
 Keep it concise and professional. No markdown. No extra text.
 """
 
-    response = requests.post(
-        "http://localhost:11434/api/generate",
-        json={
-            "model": "llama3.2",
-            "prompt": prompt,
-            "stream": False
-        }
-    )
-
-    return response.json()["response"].strip()
+    try:
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": "llama3.2",
+                "prompt": prompt,
+                "stream": False
+            },
+            timeout=10
+        )
+        response.raise_for_status()
+        return response.json()["response"].strip()
+    except Exception as e:
+        print(f"Warning: Ollama unavailable ({str(e)}). Using fallback description.")
+        # Fallback description when Ollama is not running
+        return f"Codebase structure with {len(facts['classes'])} classes and {len(facts.get('functions', []))} functions"
 
 
 def parse_file(filepath):

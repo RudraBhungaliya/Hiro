@@ -83,24 +83,19 @@ def analyze(request: AnalyzeRequest):
             if not validate_github_url(path_str):
                 raise HTTPException(status_code=400, detail="Invalid GitHub URL")
             diagram_data = parse_github_repo(path_str)
-            
+
         elif mode == "folder":
             if not os.path.exists(path_str):
-                 raise HTTPException(status_code=404, detail="Folder not found")
+                raise HTTPException(status_code=404, detail="Folder not found")
             diagram_data = parse_folder(path_str)
-            
-        elif mode == "file":
-             if not os.path.exists(path_str):
-                 raise HTTPException(status_code=404, detail="File not found")
-             diagram_data = parse_file(path_str)
-             
-        else:
-             raise HTTPException(status_code=400, detail=f"Unknown mode: {mode}")
 
-        mermaid_code = json_to_mermaid(diagram_data)
-        description = diagram_data.get("description", "")
-        nodes = diagram_data.get("nodes", [])
-        if nodes is None:
+        elif mode == "file":
+            if not os.path.exists(path_str):
+                raise HTTPException(status_code=404, detail="File not found")
+            diagram_data = parse_file(path_str)
+
+        else:
+            raise HTTPException(status_code=400, detail=f"Unknown mode: {mode}")
             nodes = []
         edges = diagram_data.get("edges", [])
         if edges is None:
