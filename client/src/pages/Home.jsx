@@ -43,7 +43,7 @@ export default function Home() {
                 <span className="text-base">↗</span>
               </Link>
               <span className="text-xs sm:text-sm text-slate-500">
-                Works with Python folders and public GitHub repositories.
+                Works with any local folder or public GitHub repository.
               </span>
             </div>
           </div>
@@ -59,7 +59,7 @@ export default function Home() {
                 <div className="rounded-2xl bg-white shadow-[0_18px_45px_rgba(15,23,42,0.15)] border border-slate-200 overflow-hidden">
                   <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200 bg-slate-50">
                     <span className="text-xs font-semibold tracking-wide text-slate-600">
-                      PYTHON PROJECT
+                      PROJECT
                     </span>
                     <span className="text-[10px] text-slate-400">analyzing…</span>
                   </div>
@@ -125,7 +125,7 @@ export default function Home() {
             </h2>
             <p className="text-sm sm:text-base leading-relaxed text-slate-700 mb-4">
               Hiro is a code architecture generator built for teams who think visually. Instead of
-              staring at thousands of lines of Python, you get a clean flow of classes, methods, and
+              staring at sprawling codebases, you get a clean flow of classes, methods, and
               function calls — similar to how a teacher would sketch the big picture on a board.
             </p>
             <p className="text-sm sm:text-base leading-relaxed text-slate-700">
@@ -151,7 +151,7 @@ export default function Home() {
           </h2>
           <div className="grid gap-5 md:grid-cols-3 text-sm sm:text-base">
             <StepCard number="1" title="Point Hiro at your code">
-              Paste a local path or GitHub URL to any Python project you want to explore.
+              Paste a local path or GitHub URL to any project you want to explore.
             </StepCard>
             <StepCard number="2" title="Watch the structure appear">
               We parse classes, methods, and function calls into a graph that mirrors your design.

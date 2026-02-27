@@ -125,7 +125,7 @@ function DiagramGenerator() {
             Code architecture generator
           </p>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-slate-900">
-            From Python files to a clean diagram.
+            From any codebase to a clean diagram.
           </h1>
           <p className="text-sm sm:text-base text-slate-700 max-w-2xl">
             Describe the project by its path, hit generate, and Hiro sketches the structure for you
@@ -276,7 +276,7 @@ function DiagramGenerator() {
             <div className="hidden md:block w-px bg-slate-300/80 mx-2" />
             <div className="md:w-56 text-[11px] text-slate-600 space-y-2 md:pl-2">
               <p className="font-semibold text-slate-700">Hint board</p>
-              <p>Best results with Python services and libraries.</p>
+              <p>Works with any codebase and public repositories.</p>
               <p>Virtual environments and caches are skipped automatically.</p>
               <p>Use the tabs below to switch between diagram and written documentation.</p>
             </div>
