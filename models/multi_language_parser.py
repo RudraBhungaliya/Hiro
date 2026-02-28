@@ -1,6 +1,5 @@
 """
 Multi-Language Parser
-Unified interface for analyzing projects with multiple languages.
 """
 
 from pathlib import Path
@@ -9,89 +8,91 @@ from models.extractors.py_extractor import extract_python
 from models.extractors.java_extractor import extract_java
 from models.extractors.js_extractor import extract_javascript
 from models.extractors.ts_extractor import extract_typescript
-from models.extractors.html_extractor import extract_html
-from models.extractors.css_extractor import extract_css
 
 
 def parse_file_any_language(filepath):
-    """
-    Universal parser that automatically detects language
-    and extracts appropriate structure.
-    
-    Args:
-        filepath: Path to source file (string or Path object)
-    
-    Returns:
-        Unified facts dictionary
-    """
-    
-    # Convert to Path object if string
     filepath = Path(filepath)
-    
-    # Parse with tree-sitter
     tree, language, code = parse_file_universal(filepath)
-    
-    # Route to appropriate extractor
+
     extractors = {
-        'python': extract_python,
-        'java': extract_java,
+        'python':     extract_python,
+        'java':       extract_java,
         'javascript': extract_javascript,
         'typescript': extract_typescript,
-        'tsx': extract_typescript,
-        'html': extract_html,
-        'css': extract_css
+        'tsx':        extract_typescript,
     }
-    
+
     extractor = extractors.get(language)
     if not extractor:
         raise ValueError(f"No extractor for language: {language}")
-    
-    # Extract facts
+
     facts = extractor(tree, code)
-    
-    # Add metadata
     facts['language'] = language
     facts['filepath'] = str(filepath)
     facts['filename'] = filepath.name
-    
+
     return facts
 
 
+def is_backend_file(filepath):
+    """
+    Returns True only for files that are actual backend logic.
+    Filters out tests, config, minified, and frontend files.
+    """
+    path = Path(filepath)
+    name = path.name.lower()
+    parts = [p.lower() for p in path.parts]
+
+    # Skip test files
+    if any(p in parts for p in ['test', 'tests', '__tests__', 'spec', 'specs']):
+        return False
+    if name.endswith('.test.js') or name.endswith('.spec.js'):
+        return False
+    if name.endswith('.test.ts') or name.endswith('.spec.ts'):
+        return False
+
+    # Skip minified files
+    if '.min.' in name:
+        return False
+
+    # Skip config / setup / seed files
+    skip_names = [
+        'config.js', 'setup.js', 'seed.js', 'jest.config.js',
+        'webpack.config.js', 'babel.config.js', 'rollup.config.js',
+        'vite.config.js', 'tailwind.config.js', 'postcss.config.js',
+        '.eslintrc.js', 'prettier.config.js'
+    ]
+    if name in skip_names:
+        return False
+
+    # Skip node_modules, build output, etc.
+    excluded_dirs = [
+        'node_modules', 'venv', '__pycache__', 'build',
+        'dist', '.git', 'target', 'out', '.next', '.nuxt',
+        'coverage', 'public', 'static', 'assets'
+    ]
+    if any(ex in parts for ex in excluded_dirs):
+        return False
+
+    return True
+
+
 def parse_folder_multi_language(folder_path):
-    """
-    Parse entire project with multiple languages.
-    
-    Handles:
-    - Python backend
-    - Java Spring Boot
-    - React frontend
-    - HTML/CSS
-    - Mixed projects (full-stack)
-    
-    Returns:
-        Dictionary with facts organized by language
-    """
-    
     folder = Path(folder_path)
-    
-    # Find all supported files
-    supported_extensions = ['.py', '.java', '.js', '.jsx', '.ts', '.tsx', '.html', '.css']
+
+    # Only backend-relevant extensions — no HTML, CSS
+    supported_extensions = ['.py', '.java', '.js', '.jsx', '.ts', '.tsx']
     all_files = []
-    
+
     for ext in supported_extensions:
         all_files.extend(folder.rglob(f'*{ext}'))
-    
-    # Filter out build/dependency folders
-    filtered_files = [
-        f for f in all_files
-        if not any(excluded in str(f) for excluded in [
-            'node_modules', 'venv', '__pycache__', 'build', 'dist',
-            '.git', 'target', 'out', '.next', '.nuxt'
-        ])
-    ]
-    
-    print(f"Found {len(filtered_files)} files across {len(set(f.suffix for f in filtered_files))} languages")
-    
+
+    # Apply backend filter
+    filtered_files = [f for f in all_files if is_backend_file(f)]
+
+    print(f"Found {len(filtered_files)} backend files "
+          f"(filtered from {len(all_files)} total)")
+
     # Group by language
     files_by_language = {}
     for file in filtered_files:
@@ -99,13 +100,13 @@ def parse_folder_multi_language(folder_path):
         if lang not in files_by_language:
             files_by_language[lang] = []
         files_by_language[lang].append(file)
-    
-    # Parse each language group
+
+    # Parse each file
     all_facts = {}
     for language, files in files_by_language.items():
         print(f"\nAnalyzing {len(files)} {language} files...")
         language_facts = []
-        
+
         for file in files:
             try:
                 facts = parse_file_any_language(file)
@@ -114,82 +115,7 @@ def parse_folder_multi_language(folder_path):
             except Exception as e:
                 print(f"  ✗ {file.name}: {e}")
                 continue
-        
+
         all_facts[language] = language_facts
-    
+
     return all_facts
-
-
-def build_unified_graph(all_facts):
-    """
-    Build unified architecture graph from multi-language facts.
-    
-    Args:
-        all_facts: Dictionary of facts by language
-    
-    Returns:
-        Unified graph with nodes and edges
-    """
-    
-    nodes = []
-    edges = []
-    id_counter = 1
-    
-    # Build nodes for each language
-    for language, facts_list in all_facts.items():
-        for facts in facts_list:
-            # Add classes
-            for cls in facts.get('classes', []):
-                # Skip if classes is a list of strings (CSS classes)
-                if isinstance(cls, str):
-                    continue
-                    
-                node_id = str(id_counter)
-                id_counter += 1
-                
-                nodes.append({
-                    'id': node_id,
-                    'label': cls['name'],
-                    'type': f'{language}_class',
-                    'language': language,
-                    'file': facts['filename']
-                })
-                
-                # Add methods as child nodes
-                for method in cls.get('methods', []):
-                    method_id = str(id_counter)
-                    id_counter += 1
-                    
-                    nodes.append({
-                        'id': method_id,
-                        'label': method,
-                        'type': 'method',
-                        'language': language,
-                        'parent': node_id
-                    })
-                    
-                    edges.append({
-                        'from': node_id,
-                        'to': method_id,
-                        'label': 'has method'
-                    })
-            
-            # Add components (React)
-            for comp in facts.get('components', []):
-                node_id = str(id_counter)
-                id_counter += 1
-                
-                nodes.append({
-                    'id': node_id,
-                    'label': comp['name'],
-                    'type': 'react_component',
-                    'language': language,
-                    'file': facts['filename']
-                })
-    
-    return {
-        'nodes': nodes,
-        'edges': edges,
-        'languages': list(all_facts.keys()),
-        'file_count': sum(len(facts_list) for facts_list in all_facts.values())
-    }
