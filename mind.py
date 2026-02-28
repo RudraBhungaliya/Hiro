@@ -1,3 +1,4 @@
+
 """
 HIRO - Multi-Language Architecture Analyzer
 Supports: Python, Java, JavaScript, React, TypeScript, HTML, CSS
@@ -5,6 +6,7 @@ Supports: Python, Java, JavaScript, React, TypeScript, HTML, CSS
 
 import sys
 from pathlib import Path
+
 
 
 def main():
@@ -28,8 +30,8 @@ def main():
         print("  python mind.py --file app.py")
         print("  python mind.py --folder ./my-project")
         print("  python mind.py --github https://github.com/user/repo")
-        sys.exit(1)
 
+        sys.exit(1)
     mode = sys.argv[1]
     target = sys.argv[2]
 
@@ -133,7 +135,6 @@ def main():
         print("Valid modes: --file, --folder, --github")
         print("Run 'python mind.py' for help")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

@@ -423,3 +423,4 @@ def parse_folder(folder_path):
         "edges": all_edges,
         "description": description
     }
+
