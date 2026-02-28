@@ -1,0 +1,349 @@
+{
+  "project_name": "Node.js Backend API",
+  "project_type": "nodejs_backend",
+  "diagram": {
+    "subgraphs": [
+      {
+        "id": "SG_CLIENT",
+        "name": "Client",
+        "direction": "TB",
+        "nodes": [
+          {
+            "id": "C1",
+            "label": "Client",
+            "description": "Makes requests to the API"
+          }
+        ]
+      },
+      {
+        "id": "SG_APP",
+        "name": "App/Entry",
+        "direction": "TB",
+        "nodes": [
+          {
+            "id": "A1",
+            "label": "index.js",
+            "description": "Entry point of the application"
+          }
+        ]
+      },
+      {
+        "id": "SG_CONFIG",
+        "name": "Config + Middleware",
+        "direction": "TB",
+        "nodes": [
+          {
+            "id": "CF1",
+            "label": "config.js",
+            "description": "Configuration file"
+          },
+          {
+            "id": "CF2",
+            "label": "logger.js",
+            "description": "Logger configuration"
+          },
+          {
+            "id": "CF3",
+            "label": "passport.js",
+            "description": "Passport configuration"
+          },
+          {
+            "id": "CF4",
+            "label": "morgan.js",
+            "description": "Morgan middleware"
+          }
+        ]
+      },
+      {
+        "id": "SG_ROUTES",
+        "name": "Routes",
+        "direction": "LR",
+        "nodes": [
+          {
+            "id": "R1",
+            "label": "auth.js",
+            "description": "Authentication routes"
+          },
+          {
+            "id": "R2",
+            "label": "error.js",
+            "description": "Error handling routes"
+          },
+          {
+            "id": "R3",
+            "label": "validate.js",
+            "description": "Validation routes"
+          }
+        ]
+      },
+      {
+        "id": "SG_CONTROLLERS",
+        "name": "Controllers",
+        "direction": "TB",
+        "nodes": [
+          {
+            "id": "CT1",
+            "label": "user.service.js",
+            "description": "User service controller"
+          },
+          {
+            "id": "CT2",
+            "label": "token.service.js",
+            "description": "Token service controller"
+          },
+          {
+            "id": "CT3",
+            "label": "auth.service.js",
+            "description": "Auth service controller"
+          }
+        ]
+      },
+      {
+        "id": "SG_SERVICES",
+        "name": "Services",
+        "direction": "TB",
+        "nodes": [
+          {
+            "id": "S1",
+            "label": "email.service.js",
+            "description": "Email service"
+          },
+          {
+            "id": "S2",
+            "label": "user.service.js",
+            "description": "User service"
+          },
+          {
+            "id": "S3",
+            "label": "token.service.js",
+            "description": "Token service"
+          },
+          {
+            "id": "S4",
+            "label": "auth.service.js",
+            "description": "Auth service"
+          }
+        ]
+      },
+      {
+        "id": "SG_MODELS",
+        "name": "Models/Repos",
+        "direction": "TB",
+        "nodes": [
+          {
+            "id": "M1",
+            "label": "token.model.js",
+            "description": "Token model"
+          },
+          {
+            "id": "M2",
+            "label": "user.model.js",
+            "description": "User model"
+          }
+        ]
+      },
+      {
+        "id": "SG_EXTERNAL_SERVICES",
+        "name": "External Services",
+        "direction": "TB",
+        "nodes": [
+          {
+            "id": "ES1",
+            "label": "Email Service",
+            "description": "Email service used by the application"
+          }
+        ]
+      },
+      {
+        "id": "SG_DATABASE",
+        "name": "Database",
+        "direction": "TB",
+        "nodes": [
+          {
+            "id": "DB1",
+            "label": "Database",
+            "description": "Database used by the application"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from": "C1",
+        "to": "A1",
+        "label": "Makes request to"
+      },
+      {
+        "from": "A1",
+        "to": "CF1",
+        "label": "Uses configuration"
+      },
+      {
+        "from": "A1",
+        "to": "CF2",
+        "label": "Uses logger"
+      },
+      {
+        "from": "A1",
+        "to": "CF3",
+        "label": "Uses passport"
+      },
+      {
+        "from": "A1",
+        "to": "CF4",
+        "label": "Uses morgan"
+      },
+      {
+        "from": "CF1",
+        "to": "R1",
+        "label": "Registers routes"
+      },
+      {
+        "from": "CF2",
+        "to": "R2",
+        "label": "Registers error handling routes"
+      },
+      {
+        "from": "CF3",
+        "to": "R3",
+        "label": "Registers validation routes"
+      },
+      {
+        "from": "R1",
+        "to": "CT1",
+        "label": "Calls user service"
+      },
+      {
+        "from": "R2",
+        "to": "CT2",
+        "label": "Calls token service"
+      },
+      {
+        "from": "R3",
+        "to": "CT3",
+        "label": "Calls auth service"
+      },
+      {
+        "from": "CT1",
+        "to": "S1",
+        "label": "Uses email service"
+      },
+      {
+        "from": "CT2",
+        "to": "S2",
+        "label": "Uses user service"
+      },
+      {
+        "from": "CT3",
+        "to": "S3",
+        "label": "Uses token service"
+      },
+      {
+        "from": "CT3",
+        "to": "S4",
+        "label": "Uses auth service"
+      },
+      {
+        "from": "S1",
+        "to": "ES1",
+        "label": "Sends email"
+      },
+      {
+        "from": "S2",
+        "to": "M1",
+        "label": "Queries token model"
+      },
+      {
+        "from": "S3",
+        "to": "M2",
+        "label": "Queries user model"
+      },
+      {
+        "from": "M1",
+        "to": "DB1",
+        "label": "Queries database"
+      },
+      {
+        "from": "M2",
+        "to": "DB1",
+        "label": "Queries database"
+      }
+    ]
+  },
+  "description": {
+    "overview": "This is a Node.js backend API that provides user authentication and email services. The API uses a microservices architecture and is built using Node.js, Express, and MongoDB. The API provides endpoints for user registration, login, and email verification.",
+    "components": [
+      {
+        "name": "index.js",
+        "role": "Entry Point",
+        "what_it_does": "Entry point of the application"
+      },
+      {
+        "name": "config.js",
+        "role": "Configuration",
+        "what_it_does": "Configuration file"
+      },
+      {
+        "name": "logger.js",
+        "role": "Logger",
+        "what_it_does": "Logger configuration"
+      },
+      {
+        "name": "passport.js",
+        "role": "Passport",
+        "what_it_does": "Passport configuration"
+      },
+      {
+        "name": "morgan.js",
+        "role": "Morgan",
+        "what_it_does": "Morgan middleware"
+      },
+      {
+        "name": "auth.js",
+        "role": "Authentication",
+        "what_it_does": "Authentication routes"
+      },
+      {
+        "name": "error.js",
+        "role": "Error Handling",
+        "what_it_does": "Error handling routes"
+      },
+      {
+        "name": "validate.js",
+        "role": "Validation",
+        "what_it_does": "Validation routes"
+      },
+      {
+        "name": "user.service.js",
+        "role": "User Service",
+        "what_it_does": "User service controller"
+      },
+      {
+        "name": "token.service.js",
+        "role": "Token Service",
+        "what_it_does": "Token service controller"
+      },
+      {
+        "name": "auth.service.js",
+        "role": "Auth Service",
+        "what_it_does": "Auth service controller"
+      },
+      {
+        "name": "email.service.js",
+        "role": "Email Service",
+        "what_it_does": "Email service"
+      },
+      {
+        "name": "token.model.js",
+        "role": "Token Model",
+        "what_it_does": "Token model"
+      },
+      {
+        "name": "user.model.js",
+        "role": "User Model",
+        "what_it_does": "User model"
+      }
+    ],
+    "architecture_pattern": "The API uses a microservices architecture, with each service being responsible for a specific functionality. The services communicate with each other using RESTful APIs. The API uses a layered architecture, with each layer being responsible for a specific functionality. The layers are: client, app/entry, config/middleware, routes, controllers, services, models/repos, database. The API uses a database to store data, and uses a logger to log errors and other events. The API uses a passport to handle authentication, and uses a morgan to handle logging."
+  }
+}
