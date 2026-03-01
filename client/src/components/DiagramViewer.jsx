@@ -109,7 +109,7 @@ const DiagramViewer = ({ chart }) => {
 
               <TransformComponent wrapperClass="w-full h-full">
                 <div className="relative w-full h-full flex items-center justify-center p-10">
-                  <div className="min-w-[1100px] min-h-[700px] flex items-start justify-center pt-12">
+                  <div className="min-w-[1100px] min-h-[700px] flex items-start justify-center pt-52">
                     <div
                       className="mermaid-diagram bg-gray-900/90 rounded-2xl border border-gray-800/80 shadow-2xl shadow-black/50 px-10 py-8"
                       dangerouslySetInnerHTML={{ __html: svgContent }}

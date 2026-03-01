@@ -1,13 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import DiagramViewer from '../components/DiagramViewer'
 import AnalysisPanel from '../components/AnalysisPanel'
-import AuthBtn from '../components/AuthBtn'
-import { useUser } from '../context/UserContext'
 import { generateArchitectureReport } from '../utils/reportGenerator'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 function DiagramGenerator() {
-  const { user } = useUser();
   const [path, setPath] = useState('');
   const [diagram, setDiagram] = useState('');
   const [analysisData, setAnalysisData] = useState(null);
@@ -15,12 +14,18 @@ function DiagramGenerator() {
   const [error, setError] = useState(null);
   const [diagramCode, setDiagramCode] = useState('');
   const [activeTab, setActiveTab] = useState('diagram');
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    fetch(`${API_URL}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => (res.ok ? res.json() : null))
+      .then(setUser)
+      .catch(() => {});
+  }, []);
 
   const handleAnalyze = async () => {
-    if (!user) {
-      setError("Please sign in with Google to generate diagrams");
-      return;
-    }
     if (!path.trim()) {
       setError("Please enter a valid path");
       return;
@@ -31,12 +36,14 @@ function DiagramGenerator() {
     setDiagramCode('');
     setAnalysisData(null);
 
+    const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     try {
-      const response = await fetch('http://localhost:8000/analyze', {
+      const response = await fetch(`${API_URL}/api/analyze`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           path: path.trim(),
           mode: "auto"
@@ -44,18 +51,14 @@ function DiagramGenerator() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Failed to analyze project");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.detail || "Failed to analyze project");
       }
 
       const data = await response.json();
 
-      if (!data.success) {
-        throw new Error("Analysis failed");
-      }
-
-      setDiagram(data.mermaid);
-      setDiagramCode(data.mermaid);
+      setDiagram(data.mermaid || '');
+      setDiagramCode(data.mermaid || '');
       setAnalysisData(data.description);
       setActiveTab('diagram');
 
@@ -97,6 +100,11 @@ function DiagramGenerator() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+  };
+
   return (
     <div className="min-h-screen bg-[#f9f5ee] text-slate-900">
       <div className="border-b border-slate-300/70 bg-[#f7efe2]/90 backdrop-blur-sm sticky top-0 z-50">
@@ -110,12 +118,21 @@ function DiagramGenerator() {
             </svg>
             Back to home
           </Link>
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:block text-xs text-slate-500">
-              Paste a local folder path or a GitHub URL.
+          {user && (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-sm text-slate-700">
+                {user.picture && <img src={user.picture} alt="" className="h-6 w-6 rounded-full" />}
+                <span className="font-medium">{user.name || user.email}</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-full border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+              >
+                Log out
+              </button>
             </div>
-            <AuthBtn />
-          </div>
+          )}
         </div>
       </div>
 
@@ -192,11 +209,11 @@ function DiagramGenerator() {
 
               <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-slate-600">
                 <button
-                  onClick={() => setPath("https://github.com/fastapi/fastapi")}
+                  onClick={() => setPath("https://github.com/zahariev-webbersof/python-mini-projects")}
                   className="inline-flex items-center gap-2 rounded-full border border-dashed border-slate-400/70 bg-white px-3 py-1.5 text-[11px] hover:border-orange-500 hover:text-orange-700 transition-colors"
                 >
                   <span>📁</span>
-                  Use sample: fastapi/fastapi
+                  Use sample: zahariev-webbersof/python-mini-projects
                 </button>
                 {diagram && (
                   <>

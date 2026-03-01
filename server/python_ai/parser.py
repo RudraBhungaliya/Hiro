@@ -223,15 +223,65 @@ def extract_with_ai(facts):
     return {"nodes": nodes, "edges": edges}
 
 
+def _fallback_description(facts):
+    """Build a structured description from facts when Ollama is unavailable."""
+    lines = []
+    classes = facts.get("classes", [])
+    functions = facts.get("functions", [])
+
+    if not classes and not functions:
+        return "No analyzable structure found."
+
+    # Overview
+    if classes:
+        names = [c["name"] for c in classes]
+        lines.append("Overview:")
+        lines.append(f"This codebase defines {len(classes)} class(es): {', '.join(names)}. ")
+        if functions:
+            lines.append(f"There are also {len(functions)} top-level function(s). ")
+        lines.append("The structure is derived from the code; run Ollama (localhost:11434, model llama3.2) for an AI-generated summary.")
+    else:
+        lines.append("Overview:")
+        lines.append(f"This codebase has {len(functions)} top-level function(s): {', '.join(functions[:10])}" + ("..." if len(functions) > 10 else "") + ". ")
+        lines.append("Run Ollama for an AI-generated summary.")
+
+    lines.append("")
+    lines.append("Components:")
+
+    for cls in classes:
+        methods = cls.get("methods", [])[:5]
+        deps = cls.get("dependencies", [])
+        methods_str = ", ".join(methods) if methods else "none"
+        deps_str = f"; depends on {', '.join(deps)}" if deps else ""
+        lines.append(f"- {cls['name']}: methods ({methods_str}){deps_str}")
+
+    for func in functions[:15]:
+        lines.append(f"- function: {func}")
+
+    if len(functions) > 15:
+        lines.append(f"- ... and {len(functions) - 15} more functions")
+
+    lines.append("")
+    lines.append("Architecture Pattern:")
+    if classes and not functions:
+        lines.append("Object-oriented structure with classes and dependencies.")
+    elif functions and not classes:
+        lines.append("Procedural or functional structure with top-level functions and calls.")
+    else:
+        lines.append("Mixed structure with both classes and top-level functions.")
+
+    return "\n".join(lines)
+
+
 def generate_description(facts, diagram_data):
     """
     Uses Ollama to generate a plain English description
     of the codebase based on extracted facts.
-    Falls back to simple description if Ollama is unavailable.
+    Falls back to a structured text description if Ollama is unavailable.
     """
     class_summary = []
 
-    if facts["classes"]:
+    if facts.get("classes"):
         for cls in facts["classes"]:
             class_summary.append(
                 f"- {cls['name']}: methods are {cls['methods']}, depends on {cls['dependencies']}"
@@ -274,14 +324,13 @@ Keep it concise and professional. No markdown. No extra text.
                 "prompt": prompt,
                 "stream": False
             },
-            timeout=10
+            timeout=15
         )
         response.raise_for_status()
         return response.json()["response"].strip()
     except Exception as e:
-        print(f"Warning: Ollama unavailable ({str(e)}). Using fallback description.")
-        # Fallback description when Ollama is not running
-        return f"Codebase structure with {len(facts['classes'])} classes and {len(facts.get('functions', []))} functions"
+        print(f"Warning: Ollama unavailable ({str(e)}). Using structured fallback description.")
+        return _fallback_description(facts)
 
 
 def parse_file(filepath):

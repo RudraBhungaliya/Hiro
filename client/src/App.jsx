@@ -1,11 +1,10 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { GoogleOAuthProvider } from '@react-oauth/google'
-import { UserProvider } from './context/UserContext'
 import './App.css'
 
 // pages
 import Home from './pages/Home'
 import DiagramGenerator from './pages/DiagramGenerator'
+import LoginSuccess from './pages/LoginSuccess'
 
 const router = createBrowserRouter([
   {
@@ -16,15 +15,15 @@ const router = createBrowserRouter([
     path: "/diagram-generator",
     element: <DiagramGenerator />
   },
+  {
+    path: "/login-success",
+    element: <LoginSuccess />
+  },
 ])
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <UserProvider>
-        <RouterProvider router={router} />
-      </UserProvider>
-    </GoogleOAuthProvider>
+    <RouterProvider router={router} />
   )
 }
 

@@ -2,7 +2,7 @@ import tempfile
 import shutil
 from pathlib import Path
 from git import Repo
-from models.folder_parser import parse_folder
+from folder_parser import parse_folder
 
 
 def parse_github_repo(repo_url):
