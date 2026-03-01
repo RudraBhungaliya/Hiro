@@ -26,7 +26,7 @@ def parse_file_any_language(filepath):
     if not extractor:
         raise ValueError(f"No extractor for language: {language}")
 
-    facts             = extractor(tree, code)
+    facts = extractor(tree, code)
     facts['language'] = language
     facts['filepath'] = str(filepath)
     facts['filename'] = filepath.name
@@ -35,21 +35,27 @@ def parse_file_any_language(filepath):
 
 
 def is_backend_file(filepath):
-    path  = Path(filepath)
-    name  = path.name.lower()
+    """
+    Returns True only for files that are actual backend logic.
+    Filters out tests, config, minified, and frontend files.
+    """
+    path = Path(filepath)
+    name = path.name.lower()
     parts = [p.lower() for p in path.parts]
 
     # Skip test files
     if any(p in parts for p in ['test', 'tests', '__tests__', 'spec', 'specs']):
         return False
-    if name.endswith(('.test.js', '.spec.js', '.test.ts', '.spec.ts')):
+    if name.endswith('.test.js') or name.endswith('.spec.js'):
+        return False
+    if name.endswith('.test.ts') or name.endswith('.spec.ts'):
         return False
 
-    # Skip minified
+    # Skip minified files
     if '.min.' in name:
         return False
 
-    # Skip config/setup files
+    # Skip config / setup / seed files
     skip_names = [
         'config.js', 'setup.js', 'seed.js', 'jest.config.js',
         'webpack.config.js', 'babel.config.js', 'rollup.config.js',
@@ -59,13 +65,13 @@ def is_backend_file(filepath):
     if name in skip_names:
         return False
 
-    # Skip build/dependency/frontend folders
-    excluded = [
-        'node_modules', 'venv', '__pycache__', 'build', 'dist',
-        '.git', 'target', 'out', '.next', '.nuxt', 'coverage',
-        'public', 'static', 'assets'
+    # Skip node_modules, build output, etc.
+    excluded_dirs = [
+        'node_modules', 'venv', '__pycache__', 'build',
+        'dist', '.git', 'target', 'out', '.next', '.nuxt',
+        'coverage', 'public', 'static', 'assets'
     ]
-    if any(ex in parts for ex in excluded):
+    if any(ex in parts for ex in excluded_dirs):
         return False
 
     return True
@@ -74,16 +80,20 @@ def is_backend_file(filepath):
 def parse_folder_multi_language(folder_path):
     folder = Path(folder_path)
 
+    # Only backend-relevant extensions — no HTML, CSS
     supported_extensions = ['.py', '.java', '.js', '.jsx', '.ts', '.tsx']
     all_files = []
+
     for ext in supported_extensions:
         all_files.extend(folder.rglob(f'*{ext}'))
 
+    # Apply backend filter
     filtered_files = [f for f in all_files if is_backend_file(f)]
 
     print(f"Found {len(filtered_files)} backend files "
           f"(filtered from {len(all_files)} total)")
 
+    # Group by language
     files_by_language = {}
     for file in filtered_files:
         lang = detect_language(file)
@@ -91,6 +101,7 @@ def parse_folder_multi_language(folder_path):
             files_by_language[lang] = []
         files_by_language[lang].append(file)
 
+    # Parse each file
     all_facts = {}
     for language, files in files_by_language.items():
         print(f"\nAnalyzing {len(files)} {language} files...")
