@@ -1,7 +1,9 @@
 """
 Multi-Language Renderer - Backend Architecture Focus
 """
+
 from pathlib import Path
+
 LANGUAGE_STYLES = {
     'python':     {'icon': '🐍'},
     'java':       {'icon': '☕'},
@@ -20,10 +22,10 @@ MAX_FUNCTIONS_PER_FILE = 6
 def detect_file_role(filename, facts):
     name = filename.lower().replace('.java', '').replace('.js', '') \
                            .replace('.ts', '').replace('.py', '')
-    funcs   = ' '.join(facts.get('functions', [])).lower()
-    classes = [c for c in facts.get('classes', []) if isinstance(c, dict)]
+    funcs      = ' '.join(facts.get('functions', [])).lower()
+    classes    = [c for c in facts.get('classes', []) if isinstance(c, dict)]
     class_names = ' '.join(c['name'] for c in classes).lower()
-    combined = name + ' ' + funcs + ' ' + class_names
+    combined   = name + ' ' + funcs + ' ' + class_names
 
     # Java Spring — use annotation-based type first
     if classes:
@@ -54,7 +56,8 @@ def detect_file_role(filename, facts):
         return 'config', 'Configuration'
     if any(w in combined for w in ['middleware', 'guard', 'interceptor', 'filter']):
         return 'middleware', 'Middleware'
-    if any(w in combined for w in ['db', 'database', 'connection', 'pool', 'mongo', 'mysql', 'postgres', 'sequelize', 'mongoose']):
+    if any(w in combined for w in ['db', 'database', 'connection', 'pool', 'mongo',
+                                    'mysql', 'postgres', 'sequelize', 'mongoose']):
         return 'database', 'Database'
     if any(w in combined for w in ['email', 'mail', 'smtp', 'notification']):
         return 'service', 'Email Service'
@@ -66,14 +69,6 @@ def detect_file_role(filename, facts):
         return 'router', 'Router'
     if any(w in combined for w in ['app', 'server', 'main', 'index', 'application']):
         return 'entry', 'Entry Point'
-    if any(w in combined for w in ['hints', 'runtime']):
-        return 'config', 'Runtime Config'
-    if any(w in combined for w in ['welcome', 'crash', 'web']):
-        return 'controller', 'Controller'
-    if any(w in combined for w in ['base', 'named', 'person', 'abstract']):
-        return 'entity', 'Base Entity'
-    if any(w in combined for w in ['pet', 'owner', 'vet', 'visit', 'specialty']):
-        return 'entity', 'Domain Entity'
 
     return 'module', 'Module'
 
@@ -108,15 +103,193 @@ def has_renderable_content(facts):
     ])
 
 
-# ── DIAGRAM BUILDER ───────────────────────────────────────────────────
+# ── AI DIAGRAM RENDERER ───────────────────────────────────────────────
+
+def render_ai_diagram(result, output_path="diagram.mmd"):
+    """
+    Renders the AI-generated architecture result as a production-quality Mermaid diagram.
+    Uses role-based shapes, colour styles, and semantic edge labels from the LLM.
+    """
+    diagram = result.get("diagram", {})
+    nodes   = diagram.get("nodes", [])
+    edges   = diagram.get("edges", [])
+    desc    = result.get("description", {})
+
+    # ── Shape map by role ─────────────────────────────────────
+    ROLE_SHAPES = {
+        "client":     lambda l: f'(["{l}"])',
+        "entry":      lambda l: f'["{l}"]',
+        "middleware": lambda l: f'{{"{l}"}}',
+        "router":     lambda l: f'["{l}"]',
+        "controller": lambda l: f'["{l}"]',
+        "service":    lambda l: f'("{l}")',
+        "repository": lambda l: f'[/"{l}"/]',
+        "entity":     lambda l: f'[("{l}")]',
+        "database":   lambda l: f'[("{l}")]',
+        "utility":    lambda l: f'("{l}")',
+        "external":   lambda l: f'(("{l}"))',
+        "module":     lambda l: f'["{l}"]',
+    }
+
+    # ── Colour styles by role ─────────────────────────────────
+    ROLE_STYLES = {
+        "client":     "fill:#16213e,color:#90caf9,stroke:#42a5f5,stroke-width:2px",
+        "entry":      "fill:#1a237e,color:#fff,stroke:#5c6bc0,stroke-width:2px",
+        "middleware": "fill:#4a148c,color:#ce93d8,stroke:#ab47bc,stroke-width:2px",
+        "router":     "fill:#01579b,color:#81d4fa,stroke:#29b6f6,stroke-width:2px",
+        "controller": "fill:#0d47a1,color:#fff,stroke:#1565c0,stroke-width:2px",
+        "service":    "fill:#4527a0,color:#fff,stroke:#7e57c2,stroke-width:2px",
+        "repository": "fill:#1b5e20,color:#a5d6a7,stroke:#43a047,stroke-width:2px",
+        "entity":     "fill:#1a3c2c,color:#80cbc4,stroke:#26a69a,stroke-width:2px",
+        "database":   "fill:#0d1f12,color:#69f0ae,stroke:#00e676,stroke-width:3px",
+        "utility":    "fill:#263238,color:#cfd8dc,stroke:#78909c,stroke-width:1px",
+        "external":   "fill:#3e0000,color:#ff8a80,stroke:#ff1744,stroke-width:2px",
+        "module":     "fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px",
+    }
+
+    # ── Render order — top to bottom visually ─────────────────
+    ROLE_ORDER = [
+        "client", "entry", "middleware", "router",
+        "controller", "service", "repository",
+        "entity", "database", "external", "utility", "module",
+    ]
+
+    lines = ["graph TD", ""]
+
+    # Group nodes by role
+    role_groups = {}
+    for node in nodes:
+        role = node.get("role", "module")
+        role_groups.setdefault(role, []).append(node)
+
+    emitted_ids = set()
+
+    for role in ROLE_ORDER:
+        group = role_groups.get(role, [])
+        if not group:
+            continue
+
+        lines.append(f"    %% {role.upper()} LAYER")
+        for node in group:
+            nid      = node["id"]
+            label    = node["label"]
+            shape_fn = ROLE_SHAPES.get(role, lambda l: f'["{l}"]')
+            lines.append(f"    {nid}{shape_fn(label)}")
+            emitted_ids.add(nid)
+        lines.append("")
+
+    # Emit any leftover nodes not matched by role order
+    leftover = [n for n in nodes if n["id"] not in emitted_ids]
+    if leftover:
+        lines.append("    %% OTHER")
+        for node in leftover:
+            nid      = node["id"]
+            label    = node["label"]
+            role     = node.get("role", "module")
+            shape_fn = ROLE_SHAPES.get(role, lambda l: f'["{l}"]')
+            lines.append(f"    {nid}{shape_fn(label)}")
+            emitted_ids.add(nid)
+        lines.append("")
+
+    # ── Edges ─────────────────────────────────────────────────
+    lines.append("    %% EDGES")
+    seen_edges = set()
+
+    for edge in edges:
+        frm   = edge.get("from", "")
+        to    = edge.get("to", "")
+        label = edge.get("label", "")
+
+        # Skip edges referencing nodes that don't exist
+        if frm not in emitted_ids or to not in emitted_ids:
+            continue
+
+        # Deduplicate
+        edge_key = f"{frm}->{to}"
+        if edge_key in seen_edges:
+            continue
+        seen_edges.add(edge_key)
+
+        # Truncate very long labels so Mermaid doesn't break
+        if len(label) > 48:
+            label = label[:45] + "..."
+
+        # Escape pipe characters in labels (breaks Mermaid syntax)
+        label = label.replace("|", "/")
+
+        lines.append(f'    {frm} -->|"{label}"| {to}')
+
+    lines.append("")
+
+    # ── Style declarations ────────────────────────────────────
+    lines.append("    %% STYLES")
+    node_by_id = {n["id"]: n for n in nodes}
+    for nid in emitted_ids:
+        node  = node_by_id.get(nid)
+        if not node:
+            continue
+        role  = node.get("role", "module")
+        style = ROLE_STYLES.get(role, ROLE_STYLES["module"])
+        lines.append(f"    style {nid} {style}")
+
+    mermaid_code = "\n".join(lines)
+
+    # ── Build text description ────────────────────────────────
+    overview    = desc.get("overview", "")
+    components  = desc.get("components", [])
+    arch        = desc.get("architecture_pattern", "")
+    proj_name   = result.get("project_name", "Architecture Diagram")
+
+    desc_lines = []
+    desc_lines.append(f"PROJECT: {proj_name}")
+    desc_lines.append("=" * 60)
+
+    if overview:
+        desc_lines.append("")
+        desc_lines.append("OVERVIEW")
+        desc_lines.append("-" * 40)
+        desc_lines.append(overview)
+
+    if components:
+        desc_lines.append("")
+        desc_lines.append("COMPONENTS")
+        desc_lines.append("-" * 40)
+        for comp in components:
+            desc_lines.append(f"  • {comp.get('name', '')}  [{comp.get('role', '')}]")
+            desc_lines.append(f"    {comp.get('what_it_does', '')}")
+            desc_lines.append("")
+
+    if arch:
+        desc_lines.append("ARCHITECTURE PATTERN")
+        desc_lines.append("-" * 40)
+        desc_lines.append(arch)
+
+    description = "\n".join(desc_lines)
+
+    # ── Print & save ──────────────────────────────────────────
+    print("=== MERMAID CODE ===")
+    print(mermaid_code)
+    print()
+    print("=== DESCRIPTION ===")
+    print(description)
+    print()
+
+    Path(output_path).write_text(mermaid_code + "\n\n---\n" + description,
+                                  encoding="utf-8")
+    print(f"✓ Diagram saved → {output_path}")
+
+    return mermaid_code, description
+
+
+# ── LEGACY DIAGRAM BUILDER (used by --file mode) ──────────────────────
 
 def build_mermaid_multi_language(all_facts):
     lines = ["graph TD"]
     lines.append("")
     edges = []
 
-    id_counter   = 1
-    file_node_map = {}  # filename -> node_id
+    id_counter    = 1
+    file_node_map = {}
     all_calls     = []
 
     for language, facts_list in all_facts.items():
@@ -137,18 +310,16 @@ def build_mermaid_multi_language(all_facts):
             filename = facts.get('filename', 'unknown')
             role, role_label = detect_file_role(filename, facts)
 
-            # File node
             file_id = str(id_counter)
             id_counter += 1
             file_node_map[filename] = file_id
 
-            display_name = filename.replace('.js','').replace('.ts','') \
-                                   .replace('.py','').replace('.java','')
+            display_name = filename.replace('.js', '').replace('.ts', '') \
+                                   .replace('.py', '').replace('.java', '')
             node_label = f"{style['icon']} {display_name}\\n[{role_label}]"
             shape = role_shape(role, node_label)
             lines.append(f'    {file_id}{shape}')
 
-            # Java Spring — classes as child nodes
             for cls in facts.get('classes', []):
                 if not isinstance(cls, dict):
                     continue
@@ -170,14 +341,12 @@ def build_mermaid_multi_language(all_facts):
 
                 edges.append(f'    {file_id} --> {cls_id}')
 
-                # Methods on class
                 for method in cls.get('methods', [])[:MAX_METHODS_PER_CLASS]:
                     m_id = str(id_counter)
                     id_counter += 1
                     lines.append(f'    {m_id}("{method}")')
                     edges.append(f'    {cls_id} -->|method| {m_id}')
 
-            # JS/Python — key functions as child nodes
             if language in ['javascript', 'typescript', 'python']:
                 funcs = facts.get('functions', [])[:MAX_FUNCTIONS_PER_FILE]
                 for func in funcs:
@@ -186,17 +355,12 @@ def build_mermaid_multi_language(all_facts):
                     lines.append(f'    {func_id}("{func}")')
                     edges.append(f'    {file_id} -->|defines| {func_id}')
 
-            # Collect require() calls for cross-file edges
             for req in facts.get('requires', []):
                 if req.startswith('.'):
-                    all_calls.append({
-                        'from_file': filename,
-                        'to_file':   req
-                    })
+                    all_calls.append({'from_file': filename, 'to_file': req})
 
         lines.append("")
 
-    # Cross-file edges from require()
     lines.append("    %% File connections")
     seen_edges = set()
 
@@ -204,11 +368,10 @@ def build_mermaid_multi_language(all_facts):
         from_file = call['from_file']
         to_path   = call['to_file']
 
-        # Match to_path against known filenames
         matched = None
         for known_file in file_node_map:
             known_stem = Path(known_file).stem.lower()
-            to_stem    = Path(to_path).name.lower().replace('.js','').replace('.ts','')
+            to_stem    = Path(to_path).name.lower().replace('.js', '').replace('.ts', '')
             if known_stem == to_stem or to_stem in known_stem:
                 matched = known_file
                 break
@@ -225,10 +388,9 @@ def build_mermaid_multi_language(all_facts):
     return "\n".join(lines)
 
 
-# ── DESCRIPTION ───────────────────────────────────────────────────────
+# ── DESCRIPTION (legacy, used by --file mode) ─────────────────────────
 
 def infer_project_domain(all_facts):
-    """Guess what the project is about from filenames and function names."""
     combined = ''
     for facts_list in all_facts.values():
         for facts in facts_list:
@@ -242,14 +404,15 @@ def infer_project_domain(all_facts):
             ).lower()
 
     domains = {
-        'University Management System':  ['student', 'professor', 'course', 'attendance', 'enrollment', 'grade', 'faculty', 'semester', 'university'],
-        'E-Commerce Platform':           ['cart', 'product', 'order', 'checkout', 'payment', 'invoice', 'shop'],
-        'Hospital Management System':    ['patient', 'doctor', 'appointment', 'prescription', 'medical', 'clinic'],
-        'Banking Application':           ['account', 'transaction', 'balance', 'transfer', 'loan', 'deposit'],
-        'Social Media Platform':         ['post', 'comment', 'like', 'follow', 'feed', 'friend', 'message'],
-        'Task Management Tool':          ['task', 'todo', 'ticket', 'kanban', 'board', 'sprint'],
-        'Restaurant Management System':  ['menu', 'order', 'table', 'reservation', 'food', 'kitchen'],
-        'Blog / CMS Platform':           ['blog', 'article', 'author', 'category', 'tag', 'content'],
+        'University Management System':  ['student', 'professor', 'course', 'attendance',
+                                           'enrollment', 'grade', 'faculty', 'semester'],
+        'E-Commerce Platform':           ['cart', 'product', 'order', 'checkout', 'payment'],
+        'Hospital Management System':    ['patient', 'doctor', 'appointment', 'prescription'],
+        'Banking Application':           ['account', 'transaction', 'balance', 'transfer'],
+        'Social Media Platform':         ['post', 'comment', 'like', 'follow', 'feed'],
+        'Task Management Tool':          ['task', 'todo', 'ticket', 'kanban', 'sprint'],
+        'Restaurant Management System':  ['menu', 'order', 'table', 'reservation', 'kitchen'],
+        'Blog / CMS Platform':           ['blog', 'article', 'author', 'category', 'tag'],
     }
 
     best_match = None
@@ -264,9 +427,9 @@ def infer_project_domain(all_facts):
 
 
 def generate_description(all_facts, cross_deps):
-    languages    = list(all_facts.keys())
-    total_files  = sum(len(fl) for fl in all_facts.values())
-    project_name, domain_score = infer_project_domain(all_facts)
+    languages   = list(all_facts.keys())
+    total_files = sum(len(fl) for fl in all_facts.values())
+    project_name, _ = infer_project_domain(all_facts)
 
     total_functions = sum(
         len(f.get('functions', []))
@@ -279,7 +442,6 @@ def generate_description(all_facts, cross_deps):
         for f in fl if isinstance(f, dict)
     )
 
-    # Detect capabilities
     combined = ''
     for fl in all_facts.values():
         for f in fl:
@@ -289,21 +451,18 @@ def generate_description(all_facts, cross_deps):
             combined += ' ' + ' '.join(f.get('functions', [])).lower()
             combined += ' ' + ' '.join(f.get('requires', [])).lower()
 
-    has_db    = any(w in combined for w in ['db', 'database', 'mongo', 'mysql', 'postgres', 'sequelize', 'mongoose', 'sql'])
+    has_db    = any(w in combined for w in ['db', 'database', 'mongo', 'mysql',
+                                              'postgres', 'sequelize', 'mongoose', 'sql'])
     has_email = any(w in combined for w in ['email', 'mail', 'nodemailer', 'smtp'])
-    has_auth  = any(w in combined for w in ['auth', 'login', 'jwt', 'token', 'passport', 'session'])
+    has_auth  = any(w in combined for w in ['auth', 'login', 'jwt', 'token', 'passport'])
     has_api   = any(w in combined for w in ['route', 'router', 'controller', 'endpoint', 'api'])
 
     desc = []
-
-    # ── 1. OVERVIEW ───────────────────────────────────────────
     desc.append("OVERVIEW")
     desc.append("-" * 40)
-
     desc.append(f"This is a {project_name}.")
     desc.append("")
 
-    # Build one solid paragraph about what it does
     what_it_does = []
     if has_api:
         what_it_does.append("exposes API endpoints to handle client requests")
@@ -322,19 +481,12 @@ def generate_description(all_facts, cross_deps):
                 f"{total_functions} functions, and {total_classes} classes.")
     desc.append("")
 
-    # ── 2. COMPONENTS ─────────────────────────────────────────
-    # ── 2. COMPONENTS ─────────────────────────────────────────
-    desc.append("COMPONENTS")
-    desc.append("-" * 40)
-
-    # Role descriptions — specific per role
     role_descriptions = {
         'controller':  'handles incoming HTTP requests and sends back responses',
         'service':     'contains the core business logic and processing rules',
         'repository':  'queries the database — reads, writes, updates, deletes data',
         'entity':      'represents a real-world object stored in the database',
         'validator':   'checks that incoming data is valid before processing it',
-        'formatter':   'converts data between formats for display or storage',
         'config':      'configures how the application starts and behaves',
         'middleware':  'intercepts every request to handle auth, logging, or validation',
         'database':    'manages the database connection used by the whole app',
@@ -344,14 +496,8 @@ def generate_description(all_facts, cross_deps):
         'module':      'contains supporting logic for the application',
     }
 
-    # Java class type descriptions
-    java_type_descriptions = {
-        'controller': 'receives HTTP requests from the client and decides what to do with them',
-        'service':    'applies business rules — the brain of the application',
-        'repository': 'speaks directly to the database on behalf of the service layer',
-        'entity':     'a data model that maps directly to a database table',
-        'class':      'contains application logic',
-    }
+    desc.append("COMPONENTS")
+    desc.append("-" * 40)
 
     seen = set()
     for lang, facts_list in all_facts.items():
@@ -375,59 +521,23 @@ def generate_description(all_facts, cross_deps):
 
             if classes:
                 for cls in classes[:2]:
-                    cls_type    = cls.get('type', 'class')
-                    methods     = cls.get('methods', [])
-                    annotations = cls.get('annotations', [])
-
-                    # Pick most specific description
-                    if lang == 'java':
-                        role_desc = java_type_descriptions.get(cls_type, 'contains application logic')
-                    else:
-                        role_desc = role_descriptions.get(role, 'contains application logic')
+                    cls_type = cls.get('type', 'class')
+                    methods  = cls.get('methods', [])
+                    role_desc = role_descriptions.get(role, 'contains application logic')
 
                     desc.append(f"  {icon} {filename}")
                     desc.append(f"     Role: {role_label} — {role_desc}")
 
-                    if annotations:
-                        desc.append(f"     Annotations: @{'  @'.join(annotations[:4])}")
+                    anns = cls.get('annotations', [])
+                    if anns:
+                        desc.append(f"     Annotations: @{'  @'.join(anns[:4])}")
+
+                    deps = cls.get('dependencies', [])
+                    if deps:
+                        desc.append(f"     Injects: {', '.join(deps[:4])}")
 
                     if methods:
-                        # Give plain English names where possible
-                        method_summary = ', '.join(methods[:6])
-                        desc.append(f"     Operations: {method_summary}")
-
-                    # Specific domain knowledge
-                    name_lower = filename.lower()
-                    if 'owner' in name_lower:
-                        desc.append(f"     Manages pet owners — their details, pets, and visit history.")
-                    elif 'pet' in name_lower and 'type' not in name_lower:
-                        desc.append(f"     Manages pets — their type, birth date, and associated visits.")
-                    elif 'vet' in name_lower:
-                        desc.append(f"     Manages vets — their specialties and profile information.")
-                    elif 'visit' in name_lower:
-                        desc.append(f"     Manages visits — when a pet came in and what was noted.")
-                    elif 'specialty' in name_lower:
-                        desc.append(f"     Represents a medical specialty a vet can have.")
-                    elif 'student' in name_lower:
-                        desc.append(f"     Manages student data and operations.")
-                    elif 'professor' in name_lower:
-                        desc.append(f"     Manages professor data and operations.")
-                    elif 'course' in name_lower:
-                        desc.append(f"     Manages course data and enrollment.")
-                    elif 'welcome' in name_lower:
-                        desc.append(f"     Serves the home/welcome page of the application.")
-                    elif 'crash' in name_lower:
-                        desc.append(f"     A test controller that intentionally triggers errors for debugging.")
-                    elif 'cache' in name_lower:
-                        desc.append(f"     Configures caching to speed up repeated database lookups.")
-                    elif 'web' in name_lower and 'config' in name_lower.replace('web',''):
-                        desc.append(f"     Configures web settings like locale, interceptors, and URL mapping.")
-                    elif 'base' in name_lower or 'named' in name_lower or 'person' in name_lower:
-                        desc.append(f"     A base class — other domain classes inherit common fields from this.")
-                    elif 'hint' in name_lower or 'runtime' in name_lower:
-                        desc.append(f"     Provides runtime configuration hints for optimized deployment.")
-                    elif 'application' in name_lower:
-                        desc.append(f"     The main entry point — this is what starts the entire application.")
+                        desc.append(f"     Operations: {', '.join(methods[:6])}")
 
                     desc.append("")
 
@@ -436,31 +546,11 @@ def generate_description(all_facts, cross_deps):
                 desc.append(f"  {icon} {filename}")
                 desc.append(f"     Role: {role_label} — {role_desc}")
                 desc.append(f"     Functions: {', '.join(funcs[:6])}")
-
-                # JS file domain hints
-                name_lower = filename.lower()
-                if 'email' in name_lower or 'mail' in name_lower:
-                    desc.append(f"     Sends automated emails — attendance alerts, notifications, reminders.")
-                elif 'db' in name_lower or 'database' in name_lower:
-                    desc.append(f"     Opens and manages the database connection for the whole application.")
-                elif 'route' in name_lower:
-                    desc.append(f"     Defines the API URL paths and links them to controller functions.")
-                elif 'controller' in name_lower:
-                    desc.append(f"     Handles specific API requests and calls the right service or query.")
-                elif 'quer' in name_lower:
-                    desc.append(f"     Contains all SQL queries — the raw database read/write operations.")
-                elif 'server' in name_lower or 'app' in name_lower:
-                    desc.append(f"     Starts the server, loads middleware, and registers all routes.")
-                elif 'script' in name_lower:
-                    desc.append(f"     Frontend script — handles UI interactions in the browser.")
-
                 desc.append("")
 
-    # ── 3. ARCHITECTURE PATTERN ───────────────────────────────
     desc.append("ARCHITECTURE PATTERN")
     desc.append("-" * 40)
 
-    # Detect pattern from roles present
     roles_present = set()
     for fl in all_facts.values():
         for f in fl:
@@ -469,8 +559,7 @@ def generate_description(all_facts, cross_deps):
             role, _ = detect_file_role(f.get('filename', ''), f)
             roles_present.add(role)
 
-    has_java     = 'java' in languages
-    has_spring   = any(
+    has_spring = any(
         facts.get('spring_patterns', {}).get('controllers')
         for fl in all_facts.values()
         for facts in fl if isinstance(facts, dict)
@@ -479,59 +568,24 @@ def generate_description(all_facts, cross_deps):
     if has_spring:
         desc.append("Pattern: MVC (Model-View-Controller) via Spring Boot")
         desc.append("")
-        desc.append("  HTTP Request")
-        desc.append("       │")
-        desc.append("       ▼")
-        desc.append("  ┌────────────┐     ┌─────────┐     ┌────────────┐     ┌──────────┐")
-        desc.append("  │ Controller │────▶│ Service │────▶│ Repository │────▶│ Database │")
-        desc.append("  └────────────┘     └─────────┘     └────────────┘     └──────────┘")
-        desc.append("")
-        desc.append("  Controller  — handles incoming requests, validates input")
-        desc.append("  Service     — applies business rules and logic")
-        desc.append("  Repository  — talks to the database")
-
-    elif {'router', 'service', 'database'}.issubset(roles_present) or \
-         {'router', 'database'}.issubset(roles_present):
+        desc.append("  HTTP Request → Controller → Service → Repository → Database")
+    elif {'router', 'service', 'database'}.issubset(roles_present):
         desc.append("Pattern: Layered Node.js Backend (Router → Service → Database)")
         desc.append("")
-        desc.append("  HTTP Request")
-        desc.append("       │")
-        desc.append("       ▼")
-        if 'entry' in roles_present:
-            desc.append("  ┌──────────┐")
-            desc.append("  │  app.js  │  (entry point — starts the server)")
-            desc.append("  └──────────┘")
-            desc.append("       │")
-            desc.append("       ▼")
-        desc.append("  ┌──────────┐     ┌─────────┐     ┌──────────┐")
-        desc.append("  │  Router  │────▶│ Service │────▶│    DB    │")
-        desc.append("  └──────────┘     └─────────┘     └──────────┘")
-        if 'middleware' in roles_present:
-            desc.append("")
-            desc.append("  Middleware sits across all layers handling auth / validation.")
-        if has_email:
-            desc.append("")
-            desc.append("  Email Service sends notifications triggered by business events.")
-
+        desc.append("  HTTP Request → app.js → Router → Service → DB")
     elif 'python' in languages:
         desc.append("Pattern: Python Backend Service")
-        desc.append("")
-        desc.append("  Input ──▶ Business Logic ──▶ Output / Database")
-
     else:
         desc.append("Pattern: Modular Backend")
-        desc.append("")
-        desc.append("  Files are organized as independent modules,")
-        desc.append("  each responsible for a specific part of the system.")
 
     desc.append("")
-
     return "\n".join(desc)
 
 
 # ── RENDER ────────────────────────────────────────────────────────────
 
 def render_multi_language(all_facts, project_name="Project"):
+    """Legacy renderer — used by --file mode. Folder/GitHub now use render_ai_diagram."""
     print("\n" + "=" * 60)
     print(f"HIRO Analysis: {project_name}")
     print("=" * 60)
@@ -540,9 +594,8 @@ def render_multi_language(all_facts, project_name="Project"):
         print(f"✗ Error: Expected dict, got {type(all_facts)}")
         return
 
-    cross_deps   = {}
     mermaid_code = build_mermaid_multi_language(all_facts)
-    description  = generate_description(all_facts, cross_deps)
+    description  = generate_description(all_facts, {})
 
     print("=== MERMAID CODE ===")
     print(mermaid_code)
