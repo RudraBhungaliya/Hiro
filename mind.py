@@ -7,7 +7,6 @@ import sys
 from pathlib import Path
 
 
-
 def main():
     if len(sys.argv) < 2:
         print("HIRO - Multi-Language Architecture Analyzer")
@@ -76,7 +75,8 @@ def main():
         print()
 
         from models.multi_language_parser import parse_folder_multi_language
-        from models.multi_language_renderer import render_multi_language
+        from models.ai_engine import analyze_with_gemini
+        from models.multi_language_renderer import render_ai_diagram
 
         try:
             all_facts = parse_folder_multi_language(target)
@@ -87,7 +87,9 @@ def main():
             print("==========================")
             print()
 
-            render_multi_language(all_facts, target)
+            print("🤖 Running AI architecture analysis...")
+            result = analyze_with_gemini(all_facts)
+            render_ai_diagram(result)
             print("✓ Analysis complete")
         except Exception as e:
             print(f"✗ Error: {e}")
@@ -125,7 +127,8 @@ def main():
             print("  python mind.py --folder <folder_path>")
             sys.exit(1)
 
-        from models.multi_language_renderer import render_multi_language
+        from models.ai_engine import analyze_with_gemini
+        from models.multi_language_renderer import render_ai_diagram
 
         if not validate_github_url(target):
             print("✗ Invalid GitHub URL. Use format: https://github.com/user/repo")
@@ -140,7 +143,9 @@ def main():
             print("==========================")
             print()
 
-            render_multi_language(all_facts, "github_repo")
+            print("🤖 Running AI architecture analysis...")
+            result = analyze_with_gemini(all_facts)
+            render_ai_diagram(result)
             print("✓ Analysis complete")
         except Exception as e:
             print(f"✗ Error: {e}")
@@ -154,6 +159,7 @@ def main():
         print("Valid modes: --file, --folder, --github")
         print("Run 'python mind.py' for help")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
