@@ -41,7 +41,7 @@ def main():
         sys.exit(0)
 
     if mode == "--cache-info":
-        from models.diagram_cache import cache_info
+        from python_ai.diagram_cache import cache_info
         cache_info()
         sys.exit(0)
     # ─────────────────────────────────────────────────────────
@@ -57,8 +57,8 @@ def main():
         print(f"🔍 HIRO analyzing file: {target}")
         print()
 
-        from models.multi_language_parser import parse_file_any_language
-        from models.multi_language_renderer import render_single_file
+        from python_ai.multi_language_parser import parse_file_any_language
+        from python_ai.multi_language_renderer import render_single_file
 
         try:
             facts = parse_file_any_language(target)
@@ -74,9 +74,9 @@ def main():
         print(f"🔍 HIRO analyzing folder: {target}")
         print()
 
-        from models.multi_language_parser import parse_folder_multi_language
-        from models.ai_engine import analyze_with_gemini
-        from models.multi_language_renderer import render_ai_diagram
+        from python_ai.multi_language_parser import parse_folder_multi_language
+        from python_ai.ai_engine import analyze_with_gemini
+        from python_ai.multi_language_renderer import render_ai_diagram
 
         try:
             all_facts = parse_folder_multi_language(target)
@@ -102,7 +102,7 @@ def main():
         print()
 
         try:
-            from models.github_parser import parse_github_repo, validate_github_url
+            from python_ai.github_parser import parse_github_repo, validate_github_url
         except ImportError as e:
             print("✗ GitHub integration not available.")
             print()
@@ -127,8 +127,8 @@ def main():
             print("  python mind.py --folder <folder_path>")
             sys.exit(1)
 
-        from models.ai_engine import analyze_with_gemini
-        from models.multi_language_renderer import render_ai_diagram
+        from python_ai.ai_engine import analyze_with_gemini
+        from python_ai.multi_language_renderer import render_ai_diagram
 
         if not validate_github_url(target):
             print("✗ Invalid GitHub URL. Use format: https://github.com/user/repo")
