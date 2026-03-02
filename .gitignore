@@ -1,0 +1,54 @@
+# 🔐 Secrets
+.env
+.env.*
+*.key
+*.pem
+
+# 🐍 Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 🧪 Virtual environments
+venv/
+.env/
+ENV/
+.venv/
+
+# 📦 Build / Distribution
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# 🧾 Logs
+*.log
+
+# 🧠 IDE files
+.vscode/
+.idea/
+*.swp
+
+# 🍎 MacOS
+.DS_Store
+
+# 🪟 Windows
+Thumbs.db
+
+# 🧪 Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 🧠 Jupyter
+.ipynb_checkpoints/
+
+# 🐳 Docker
+*.env.docker
+
+# 🔥 Node (if frontend added later)
+node_modules/
+
+# 🗂 Temporary files
+*.tmp
+*.bak
