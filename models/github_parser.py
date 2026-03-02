@@ -1,9 +1,17 @@
+import os
+import stat
 import tempfile
 import shutil
 from pathlib import Path
 from git import Repo
 
 from models.multi_language_parser import parse_folder_multi_language
+
+def _force_remove(func, path, exc_info):
+    """Remove read-only flag and retry — fixes Windows Git repo cleanup."""
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
 def parse_github_repo(repo_url):
     temp_dir = None
     try:
@@ -16,13 +24,12 @@ def parse_github_repo(repo_url):
         all_facts = parse_folder_multi_language(temp_dir)
         return all_facts
 
-        
     except Exception as e:
         raise Exception(f"Failed to analyze repository: {str(e)}")
         
     finally:
         if temp_dir and Path(temp_dir).exists():
-            shutil.rmtree(temp_dir)
+            shutil.rmtree(temp_dir, onexc=_force_remove)
             print(f"Cleaned up temporary files")
 
 

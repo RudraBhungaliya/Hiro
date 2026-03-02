@@ -1,146 +1,135 @@
 graph TD
 
     %% CLIENT LAYER
-    n19(["main.jsx"])
-    n20(["App.jsx"])
-    n21(["authContext.jsx"])
-    n22(["socketContext.jsx"])
-    n24(["Client / Browser"])
-    n26(["HTTP Request"])
+    n8(["App.jsx"])
+    n28(["Client / Browser"])
 
     %% ENTRY LAYER
-    n1["server.js"]
-
-    %% MIDDLEWARE LAYER
-    n14{"auth.js"}
-    n15{"upload.js"}
-    n25{"Auth Layer"}
+    n2["server.js"]
+    n9["main.jsx"]
 
     %% ROUTER LAYER
-    n3["authRoute.js"]
-    n4["chatRoute.js"]
-    n5["messageRoute.js"]
-    n6["userRoute.js"]
+    n6["auth.js"]
+    n7["blog.js"]
 
     %% CONTROLLER LAYER
-    n7["authController.js"]
-    n8["chatController.js"]
-    n9["messageController.js"]
-    n10["userController.js"]
+    n3["auth.js"]
+
+    %% SERVICE LAYER
+    n25("myState.jsx")
 
     %% ENTITY LAYER
-    n11[("Chat.js")]
-    n12[("Message.js")]
-    n13[("User.js")]
+    n4[("Blog.js")]
+    n5[("User.js")]
 
     %% DATABASE LAYER
-    n2[("db.js")]
-    n23[("Database")]
+    n26[("Database")]
+
+    %% EXTERNAL LAYER
+    n27(("Auth Layer"))
 
     %% UTILITY LAYER
-    n16("emitter.js")
-    n17("socket.js")
-    n18("utils.js")
+    n1("eslint.config.js")
+    n24("myContext.jsx")
+
+    %% OTHER
+    n10["BlogCard.jsx"]
+    n11["Footer.jsx"]
+    n12["GoogleSignInButton.jsx"]
+    n13["Loader.jsx"]
+    n14["Navbar.jsx"]
+    n15["AboutUsPage.jsx"]
+    n16["AllBlogs.jsx"]
+    n17["BlogInfo.jsx"]
+    n18["ContactUsPage.jsx"]
+    n19["CreateBlog.jsx"]
+    n20["Dashboard.jsx"]
+    n21["EditBlog.jsx"]
+    n22["ErrorPage.jsx"]
+    n23["HomePage.jsx"]
 
     %% EDGES
-    n1 -->|"connects to database"| n2
-    n1 -->|"routes authentication requests"| n3
-    n1 -->|"routes chat requests"| n4
-    n1 -->|"routes message requests"| n5
-    n1 -->|"routes user requests"| n6
-    n3 -->|"handles authentication logic"| n7
-    n4 -->|"handles chat logic"| n8
-    n5 -->|"handles message logic"| n9
-    n6 -->|"handles user logic"| n10
-    n7 -->|"queries chat data"| n11
-    n7 -->|"queries message data"| n12
-    n7 -->|"queries user data"| n13
-    n8 -->|"queries chat data"| n11
-    n9 -->|"queries message data"| n12
-    n10 -->|"queries user data"| n13
-    n14 -->|"authenticates incoming requests"| n1
-    n15 -->|"handles file uploads"| n1
-    n16 -->|"emits events to connected clients"| n1
-    n17 -->|"establishes WebSocket connections"| n1
-    n18 -->|"provides utility functions"| n1
-    n19 -->|"renders application UI"| n20
-    n20 -->|"manages authentication state"| n21
-    n20 -->|"manages WebSocket connections"| n22
-    n21 -->|"shares authentication state"| n22
-    n22 -->|"establishes WebSocket connections"| n17
-    n23 -->|"stores application data"| n2
-    n24 -->|"renders application UI"| n19
-    n25 -->|"authenticates incoming requests"| n1
-    n26 -->|"sends requests to server"| n1
+    n2 -->|"requires auth.js"| n3
+    n2 -->|"requires blog.js"| n7
+    n3 -->|"uses User.js"| n4
+    n3 -->|"uses Blog.js"| n5
+    n6 -->|"routes to auth.js"| n3
+    n7 -->|"uses Blog.js"| n4
+    n8 -->|"renders main.jsx"| n9
+    n9 -->|"sets up App.jsx"| n8
+    n10 -->|"renders in App.jsx"| n8
+    n11 -->|"renders in App.jsx"| n8
+    n12 -->|"renders in App.jsx"| n8
+    n13 -->|"renders in App.jsx"| n8
+    n14 -->|"renders in App.jsx"| n8
+    n15 -->|"renders in App.jsx"| n8
+    n16 -->|"renders in App.jsx"| n8
+    n17 -->|"renders in App.jsx"| n8
+    n18 -->|"renders in App.jsx"| n8
+    n19 -->|"renders in App.jsx"| n8
+    n20 -->|"renders in App.jsx"| n8
+    n21 -->|"renders in App.jsx"| n8
+    n22 -->|"renders in App.jsx"| n8
+    n23 -->|"renders in App.jsx"| n8
+    n24 -->|"provides context for App.jsx"| n8
+    n25 -->|"uses myContext.jsx"| n24
+    n25 -->|"queries Database"| n26
+    n2 -->|"connects to Database"| n26
+    n3 -->|"uses Auth Layer"| n27
+    n28 -->|"renders App.jsx"| n8
 
     %% STYLES
-    style n12 fill:#1a3c2c,color:#80cbc4,stroke:#26a69a,stroke-width:2px
-    style n24 fill:#16213e,color:#90caf9,stroke:#42a5f5,stroke-width:2px
-    style n3 fill:#01579b,color:#81d4fa,stroke:#29b6f6,stroke-width:2px
-    style n17 fill:#263238,color:#cfd8dc,stroke:#78909c,stroke-width:1px
-    style n18 fill:#263238,color:#cfd8dc,stroke:#78909c,stroke-width:1px
-    style n25 fill:#4a148c,color:#ce93d8,stroke:#ab47bc,stroke-width:2px
-    style n2 fill:#0d1f12,color:#69f0ae,stroke:#00e676,stroke-width:3px
-    style n5 fill:#01579b,color:#81d4fa,stroke:#29b6f6,stroke-width:2px
-    style n26 fill:#16213e,color:#90caf9,stroke:#42a5f5,stroke-width:2px
-    style n22 fill:#16213e,color:#90caf9,stroke:#42a5f5,stroke-width:2px
-    style n7 fill:#0d47a1,color:#fff,stroke:#1565c0,stroke-width:2px
-    style n11 fill:#1a3c2c,color:#80cbc4,stroke:#26a69a,stroke-width:2px
-    style n4 fill:#01579b,color:#81d4fa,stroke:#29b6f6,stroke-width:2px
-    style n13 fill:#1a3c2c,color:#80cbc4,stroke:#26a69a,stroke-width:2px
-    style n14 fill:#4a148c,color:#ce93d8,stroke:#ab47bc,stroke-width:2px
-    style n15 fill:#4a148c,color:#ce93d8,stroke:#ab47bc,stroke-width:2px
-    style n20 fill:#16213e,color:#90caf9,stroke:#42a5f5,stroke-width:2px
-    style n1 fill:#1a237e,color:#fff,stroke:#5c6bc0,stroke-width:2px
-    style n9 fill:#0d47a1,color:#fff,stroke:#1565c0,stroke-width:2px
-    style n19 fill:#16213e,color:#90caf9,stroke:#42a5f5,stroke-width:2px
-    style n16 fill:#263238,color:#cfd8dc,stroke:#78909c,stroke-width:1px
-    style n8 fill:#0d47a1,color:#fff,stroke:#1565c0,stroke-width:2px
-    style n23 fill:#0d1f12,color:#69f0ae,stroke:#00e676,stroke-width:3px
-    style n21 fill:#16213e,color:#90caf9,stroke:#42a5f5,stroke-width:2px
-    style n10 fill:#0d47a1,color:#fff,stroke:#1565c0,stroke-width:2px
+    style n1 fill:#263238,color:#cfd8dc,stroke:#78909c,stroke-width:1px
+    style n26 fill:#0d1f12,color:#69f0ae,stroke:#00e676,stroke-width:3px
+    style n12 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n13 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n2 fill:#1a237e,color:#fff,stroke:#5c6bc0,stroke-width:2px
+    style n27 fill:#3e0000,color:#ff8a80,stroke:#ff1744,stroke-width:2px
+    style n9 fill:#1a237e,color:#fff,stroke:#5c6bc0,stroke-width:2px
+    style n24 fill:#263238,color:#cfd8dc,stroke:#78909c,stroke-width:1px
+    style n5 fill:#1a3c2c,color:#80cbc4,stroke:#26a69a,stroke-width:2px
+    style n23 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n22 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n4 fill:#1a3c2c,color:#80cbc4,stroke:#26a69a,stroke-width:2px
+    style n10 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n11 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n28 fill:#16213e,color:#90caf9,stroke:#42a5f5,stroke-width:2px
+    style n17 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n7 fill:#01579b,color:#81d4fa,stroke:#29b6f6,stroke-width:2px
+    style n21 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n16 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n15 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n18 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n14 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n19 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n20 fill:#212121,color:#eeeeee,stroke:#757575,stroke-width:1px
+    style n8 fill:#16213e,color:#90caf9,stroke:#42a5f5,stroke-width:2px
     style n6 fill:#01579b,color:#81d4fa,stroke:#29b6f6,stroke-width:2px
+    style n3 fill:#0d47a1,color:#fff,stroke:#1565c0,stroke-width:2px
+    style n25 fill:#4527a0,color:#fff,stroke:#7e57c2,stroke-width:2px
 
 ---
-PROJECT: Real-time Chat Application with Authentication and File Sharing
+PROJECT: Blog Website with User Authentication and Blog Management
 ============================================================
 
 OVERVIEW
 ----------------------------------------
-The Real-time Chat Application with Authentication and File Sharing is a web-based application that allows users to chat with each other in real-time, share files, and authenticate using Google OAuth. The application is built using Node.js, Express, and MongoDB, and utilizes WebSockets for real-time communication. The application has a client-side UI built using React, and uses various libraries and frameworks to provide a seamless user experience.
+This project is a blog website with user authentication and blog management capabilities. It uses a React frontend and an Express backend, with a MongoDB database for storing and retrieving data. The application provides features such as user registration, login, and blog creation, editing, and deletion. The project uses a microservices architecture, with separate services for authentication, blog management, and database access.
 
 COMPONENTS
 ----------------------------------------
-  • server.js  [Entry Point]
-    The main entry point of the application, responsible for setting up the Express server and routing.
+  • App.jsx  [Main Application Component]
+    Renders the main application component, which includes the navigation bar, blog list, and blog details
 
-  • db.js  [Database Configuration]
-    The database configuration file, responsible for connecting to the MongoDB database using Mongoose.
+  • auth.js  [Authentication Service]
+    Handles user authentication, including registration, login, and token verification
 
-  • authRoute.js  [Authentication Route Handler]
-    The authentication route handler, responsible for handling authentication-related requests.
+  • Blog.js  [Blog Entity]
+    Represents a blog entity, with properties such as title, content, and author
 
-  • chatRoute.js  [Chat Route Handler]
-    The chat route handler, responsible for handling chat-related requests.
-
-  • messageRoute.js  [Message Route Handler]
-    The message route handler, responsible for handling message-related requests.
-
-  • userRoute.js  [User Route Handler]
-    The user route handler, responsible for handling user-related requests.
-
-  • authController.js  [Authentication Controller]
-    The authentication controller, responsible for handling authentication-related logic.
-
-  • chatController.js  [Chat Controller]
-    The chat controller, responsible for handling chat-related logic.
-
-  • messageController.js  [Message Controller]
-    The message controller, responsible for handling message-related logic.
-
-  • userController.js  [User Controller]
-    The user controller, responsible for handling user-related logic.
+  • myState.jsx  [Application State Manager]
+    Manages the application state, including user data, blog data, and authentication status
 
 ARCHITECTURE PATTERN
 ----------------------------------------
-The application follows a Microservices Architecture pattern, with each component responsible for a specific functionality. The application uses a combination of RESTful APIs and WebSockets to communicate between components. The client-side UI is built using a Model-View-Controller (MVC) pattern, with React components managing the UI and state. The application uses a MongoDB database to store data, and Mongoose to interact with the database. The application also uses various libraries and frameworks, such as Express, Socket.IO, and Passport.js, to provide a seamless user experience.
+The project uses a microservices architecture, with separate services for authentication, blog management, and database access. The frontend uses a React-based architecture, with a main application component that renders the navigation bar, blog list, and blog details. The backend uses an Express-based architecture, with separate routes for authentication, blog management, and database access. The database is a MongoDB database, which stores and retrieves data for the application. The application uses a RESTful API to communicate between the frontend and backend, with API endpoints for authentication, blog creation, editing, and deletion.
